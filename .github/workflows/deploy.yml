@@ -7,7 +7,7 @@ on:
 jobs:
   deploy:
     name: deploy
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, xlarge]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -25,6 +25,9 @@ jobs:
           sudo snap install --classic juju-wait
       - name: Apply terraform
         run: |
+          # Temporary workaround as config option enable-telemetry-notifications is
+          # available only on 2023.1/edge channel
+          echo '{"openstack-channel": "2023.1/edge"}' > terraform.tfvars.json
           terraform init
           terraform apply -auto-approve
           juju model-config -m openstack automatically-retry-hooks=true
