@@ -20,12 +20,12 @@ variable "openstack-channel" {
 
 variable "mysql-channel" {
   description = "Operator channel for MySQL deployment"
-  default     = "8.0/candidate"
+  default     = "8.0/beta"
 }
 
 variable "mysql-router-channel" {
   description = "Operator channel for MySQL router deployment"
-  default     = "8.0/candidate"
+  default     = "8.0/beta"
   type        = string
 }
 
