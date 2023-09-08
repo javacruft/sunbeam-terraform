@@ -34,3 +34,8 @@ output "ovn-relay-offer-url" {
   description = "URL of the ovn relay offer"
   value       = one(module.ovn.ovn-relay-offer-url[*])
 }
+
+output "ceilometer-offer-url" {
+  description = "URL of the ceilometer offer"
+  value       = one(juju_offer.ceilometer-offer[*].url)
+}

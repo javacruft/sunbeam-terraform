@@ -475,3 +475,10 @@ resource "juju_integration" "ceilometer-to-keystone" {
     endpoint = "identity-credentials"
   }
 }
+
+resource "juju_offer" "ceilometer-offer" {
+  count            = var.enable-telemetry ? 1 : 0
+  model            = juju_model.sunbeam.name
+  application_name = juju_application.ceilometer[count.index].name
+  endpoint         = "ceilometer-service"
+}
