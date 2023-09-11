@@ -22,3 +22,8 @@ output "keystone-offer-url" {
   description = "URL of the keystone offer"
   value       = juju_offer.keystone-offer[*].url
 }
+
+output "cinder-ceph-offer-url" {
+  description = "URL of the cinder ceph offer"
+  value       = juju_offer.cinder-ceph-offer[*].url
+}
