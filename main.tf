@@ -178,14 +178,13 @@ resource "juju_application" "certificate-authority" {
   model = juju_model.sunbeam.name
 
   charm {
-    name    = "tls-certificates-operator"
-    channel = "latest/stable"
+    name    = "self-signed-certificates"
+    channel = "latest/beta"
     series  = "jammy"
   }
 
   config = {
-    generate-self-signed-certificates = true
-    ca-common-name                    = "internal-ca"
+    ca-common-name = "internal-ca"
   }
 }
 
