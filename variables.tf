@@ -31,7 +31,7 @@ variable "mysql-router-channel" {
 
 variable "rabbitmq-channel" {
   description = "Operator channel for RabbitMQ deployment"
-  default     = "3.9/stable"
+  default     = "3.12/edge"
 }
 
 variable "ovn-channel" {
