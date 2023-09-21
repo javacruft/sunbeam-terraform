@@ -117,3 +117,14 @@ variable "telemetry-channel" {
   description = "Operator channel for OpenStack Telemetry deployment"
   default     = "2023.1/edge"
 }
+
+variable "enable-octavia" {
+  description = "Enable OpenStack Octavia service"
+  default     = false
+}
+
+# Temporary channel for octavia until 2023.1/stable is released.
+variable "octavia-channel" {
+  description = "Operator channel for OpenStack Octavia deployment"
+  default     = "2023.1/edge"
+}

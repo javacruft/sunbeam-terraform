@@ -482,3 +482,61 @@ resource "juju_offer" "ceilometer-offer" {
   application_name = juju_application.ceilometer[count.index].name
   endpoint         = "ceilometer-service"
 }
+
+module "mysql-octavia" {
+  count      = var.enable-octavia ? (var.many-mysql ? 1 : 0) : 0
+  source     = "./modules/mysql"
+  model      = juju_model.sunbeam.name
+  name       = "mysql"
+  channel    = var.mysql-channel
+  scale      = var.ha-scale
+  many-mysql = var.many-mysql
+  services   = ["octavia"]
+}
+
+module "octavia" {
+  count                = var.enable-octavia ? 1 : 0
+  source               = "./modules/openstack-api"
+  charm                = "octavia-k8s"
+  name                 = "octavia"
+  model                = juju_model.sunbeam.name
+  channel              = var.octavia-channel
+  mysql                = var.many-mysql ? module.mysql-octavia[0].name["heat"] : "mysql"
+  keystone             = module.keystone.name
+  ingress-internal     = juju_application.traefik.name
+  ingress-public       = juju_application.traefik.name
+  scale                = var.os-api-scale
+  mysql-router-channel = var.mysql-router-channel
+}
+
+# juju integrate ovn-central octavia
+resource "juju_integration" "ovn-central-to-octavia" {
+  count = var.enable-octavia ? 1 : 0
+  model = juju_model.sunbeam.name
+
+  application {
+    name     = module.ovn.name
+    endpoint = "ovsdb-cms"
+  }
+
+  application {
+    name     = module.octavia[count.index].name
+    endpoint = "ovsdb-cms"
+  }
+}
+
+# juju integrate octavia certificates
+resource "juju_integration" "octavia-to-ca" {
+  count = var.enable-octavia ? 1 : 0
+  model = juju_model.sunbeam.name
+
+  application {
+    name     = module.octavia[count.index].name
+    endpoint = "certificates"
+  }
+
+  application {
+    name     = juju_application.certificate-authority.name
+    endpoint = "certificates"
+  }
+}
