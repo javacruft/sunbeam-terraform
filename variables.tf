@@ -128,3 +128,26 @@ variable "octavia-channel" {
   description = "Operator channel for OpenStack Octavia deployment"
   default     = "2023.1/edge"
 }
+variable "enable-designate" {
+  description = "Enable OpenStack Designate service"
+  default     = false
+}
+
+variable "designate-channel" {
+  description = "Operator channel for OpenStack Designate deployment"
+  default     = "2023.1/edge"
+}
+
+variable "bind-channel" {
+  description = "Operator channel for Bind deployment"
+  default     = "latest/edge"
+}
+
+variable "nameservers" {
+  description = <<-EOT
+    Space delimited list of nameservers. These are the nameservers that have been provided
+    to the domain registrar in order to delegate the domain to Designate.
+    e.g. "ns1.example.com. ns2.example.com."
+  EOT
+  default     = ""
+}

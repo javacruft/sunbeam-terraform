@@ -539,3 +539,62 @@ resource "juju_integration" "octavia-to-ca" {
     endpoint = "certificates"
   }
 }
+
+resource "juju_application" "bind" {
+  count = var.enable-designate ? 1 : 0
+  name  = "bind"
+  model = juju_model.sunbeam.name
+
+  charm {
+    name    = "bind9-k8s"
+    channel = var.bind-channel
+    series  = "jammy"
+  }
+
+  units = var.ha-scale
+}
+
+module "mysql-designate" {
+  count      = var.enable-designate ? (var.many-mysql ? 1 : 0) : 0
+  source     = "./modules/mysql"
+  model      = juju_model.sunbeam.name
+  name       = "mysql"
+  channel    = var.mysql-channel
+  scale      = var.ha-scale
+  many-mysql = var.many-mysql
+  services   = ["designate"]
+}
+
+module "designate" {
+  count                = var.enable-designate ? 1 : 0
+  source               = "./modules/openstack-api"
+  charm                = "designate-k8s"
+  name                 = "designate"
+  model                = juju_model.sunbeam.name
+  channel              = var.designate-channel
+  rabbitmq             = module.rabbitmq.name
+  mysql                = var.many-mysql ? module.mysql-designate[0].name["designate"] : "mysql"
+  keystone             = module.keystone.name
+  ingress-internal     = juju_application.traefik.name
+  ingress-public       = juju_application.traefik.name
+  scale                = var.os-api-scale
+  mysql-router-channel = var.mysql-router-channel
+  resource-configs = {
+    "nameservers" = var.nameservers
+  }
+}
+
+resource "juju_integration" "designate-to-bind" {
+  count = var.enable-designate ? 1 : 0
+  model = juju_model.sunbeam.name
+
+  application {
+    name     = module.designate[count.index].name
+    endpoint = "dns-backend"
+  }
+
+  application {
+    name     = juju_application.bind[count.index].name
+    endpoint = "dns-backend"
+  }
+}
