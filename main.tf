@@ -159,9 +159,9 @@ resource "juju_application" "traefik" {
   model = juju_model.sunbeam.name
 
   charm {
-    name    = "traefik-k8s"
-    channel = "1.0/candidate"
-    series  = "focal"
+    name     = "traefik-k8s"
+    revision = 156
+    series   = "focal"
   }
 
   units = var.ingress-scale
