@@ -181,3 +181,14 @@ variable "magnum-channel" {
   description = "Operator channel for OpenStack Magnum deployment"
   default     = "2023.2/edge"
 }
+
+variable "ldap-channel" {
+  description = "Operator channel for Keystone LDAP deployment"
+  default     = "2023.2/edge"
+}
+
+variable "ldap_apps" {
+  description = "A list of LDAP Apps"
+  type        = map(map(string))
+  default     = {}
+}
