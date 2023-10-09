@@ -598,3 +598,18 @@ resource "juju_integration" "designate-to-bind" {
     endpoint = "dns-backend"
   }
 }
+
+resource "juju_application" "vault" {
+  count = var.enable-vault ? 1 : 0
+  model = juju_model.sunbeam.name
+  name  = "vault"
+
+  charm {
+    name     = "vault-k8s"
+    channel  = var.vault-channel
+    revision = 32
+    series   = "jammy"
+  }
+
+  units = 1
+}
