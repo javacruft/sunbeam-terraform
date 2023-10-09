@@ -151,3 +151,13 @@ variable "nameservers" {
   EOT
   default     = ""
 }
+
+variable "enable-vault" {
+  description = "Enable Vault service"
+  default     = false
+}
+
+variable "vault-channel" {
+  description = "Operator channel for Vault deployment"
+  default     = "latest/edge"
+}
