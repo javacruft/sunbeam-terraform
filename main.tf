@@ -74,7 +74,7 @@ module "glance" {
   mysql                = module.mysql.name["glance"]
   keystone             = module.keystone.name
   ingress-internal     = juju_application.traefik.name
-  ingress-public       = juju_application.traefik.name
+  ingress-public       = juju_application.traefik-public.name
   scale                = var.enable-ceph ? var.os-api-scale : 1
   mysql-router-channel = var.mysql-router-channel
   resource-configs = {
@@ -92,7 +92,7 @@ module "keystone" {
   rabbitmq             = module.rabbitmq.name
   mysql                = module.mysql.name["keystone"]
   ingress-internal     = juju_application.traefik.name
-  ingress-public       = juju_application.traefik.name
+  ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
   mysql-router-channel = var.mysql-router-channel
   resource-configs = {
@@ -110,7 +110,7 @@ module "nova" {
   mysql                = module.mysql.name["nova"]
   keystone             = module.keystone.name
   ingress-internal     = juju_application.traefik.name
-  ingress-public       = juju_application.traefik.name
+  ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
   mysql-router-channel = var.mysql-router-channel
 }
@@ -124,7 +124,7 @@ module "horizon" {
   mysql                = module.mysql.name["horizon"]
   keystone-credentials = module.keystone.name
   ingress-internal     = juju_application.traefik.name
-  ingress-public       = juju_application.traefik.name
+  ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
   mysql-router-channel = var.mysql-router-channel
 }
@@ -139,7 +139,7 @@ module "neutron" {
   mysql                = module.mysql.name["neutron"]
   keystone             = module.keystone.name
   ingress-internal     = juju_application.traefik.name
-  ingress-public       = juju_application.traefik.name
+  ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
   mysql-router-channel = var.mysql-router-channel
 }
@@ -153,13 +153,27 @@ module "placement" {
   mysql                = module.mysql.name["placement"]
   keystone             = module.keystone.name
   ingress-internal     = juju_application.traefik.name
-  ingress-public       = juju_application.traefik.name
+  ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
   mysql-router-channel = var.mysql-router-channel
 }
 
 resource "juju_application" "traefik" {
   name  = "traefik"
+  trust = true
+  model = juju_model.sunbeam.name
+
+  charm {
+    name    = "traefik-k8s"
+    channel = "1.0/candidate"
+    series  = "focal"
+  }
+
+  units = var.ingress-scale
+}
+
+resource "juju_application" "traefik-public" {
+  name  = "traefik-public"
   trust = true
   model = juju_model.sunbeam.name
 
@@ -268,7 +282,7 @@ module "cinder" {
   mysql                = module.mysql.name["cinder"]
   keystone             = module.keystone.name
   ingress-internal     = juju_application.traefik.name
-  ingress-public       = juju_application.traefik.name
+  ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
   mysql-router-channel = var.mysql-router-channel
 }
@@ -348,7 +362,7 @@ module "heat" {
   keystone             = module.keystone.name
   keystone-ops         = module.keystone.name
   ingress-internal     = juju_application.traefik.name
-  ingress-public       = juju_application.traefik.name
+  ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
   mysql-router-channel = var.mysql-router-channel
 }
@@ -365,7 +379,7 @@ module "heat-cfn" {
   keystone             = module.keystone.name
   keystone-ops         = module.keystone.name
   ingress-internal     = juju_application.traefik.name
-  ingress-public       = juju_application.traefik.name
+  ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
   mysql-router-channel = var.mysql-router-channel
   resource-configs = {
@@ -395,7 +409,7 @@ module "aodh" {
   mysql                = var.many-mysql ? module.mysql-telemetry[0].name["aodh"] : "mysql"
   keystone             = module.keystone.name
   ingress-internal     = juju_application.traefik.name
-  ingress-public       = juju_application.traefik.name
+  ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
   mysql-router-channel = var.mysql-router-channel
 }
@@ -410,7 +424,7 @@ module "gnocchi" {
   mysql                = var.many-mysql ? module.mysql-telemetry[0].name["gnocchi"] : "mysql"
   keystone             = module.keystone.name
   ingress-internal     = juju_application.traefik.name
-  ingress-public       = juju_application.traefik.name
+  ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
   mysql-router-channel = var.mysql-router-channel
   resource-configs = {
@@ -503,7 +517,7 @@ module "octavia" {
   mysql                = var.many-mysql ? module.mysql-octavia[0].name["heat"] : "mysql"
   keystone             = module.keystone.name
   ingress-internal     = juju_application.traefik.name
-  ingress-public       = juju_application.traefik.name
+  ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
   mysql-router-channel = var.mysql-router-channel
 }
@@ -576,7 +590,7 @@ module "designate" {
   mysql                = var.many-mysql ? module.mysql-designate[0].name["designate"] : "mysql"
   keystone             = module.keystone.name
   ingress-internal     = juju_application.traefik.name
-  ingress-public       = juju_application.traefik.name
+  ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
   mysql-router-channel = var.mysql-router-channel
   resource-configs = {
