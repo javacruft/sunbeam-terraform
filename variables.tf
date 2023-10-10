@@ -161,3 +161,13 @@ variable "vault-channel" {
   description = "Operator channel for Vault deployment"
   default     = "latest/edge"
 }
+
+variable "enable-barbican" {
+  description = "Enable OpenStack Barbican service"
+  default     = false
+}
+
+variable "barbican-channel" {
+  description = "Operator channel for OpenStack Barbican deployment"
+  default     = "2023.1/edge"
+}
