@@ -680,6 +680,7 @@ module "barbican" {
   rabbitmq             = module.rabbitmq.name
   mysql                = var.many-mysql ? module.mysql-barbican[0].name["barbican"] : "mysql"
   keystone             = module.keystone.name
+  keystone-ops         = module.keystone.name
   ingress-internal     = juju_application.traefik.name
   ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
