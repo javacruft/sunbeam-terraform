@@ -546,6 +546,7 @@ module "octavia" {
   channel              = var.octavia-channel
   mysql                = var.many-mysql ? module.mysql-octavia[0].name["heat"] : "mysql"
   keystone             = module.keystone.name
+  keystone-ops         = module.keystone.name
   ingress-internal     = juju_application.traefik.name
   ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
