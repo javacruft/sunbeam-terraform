@@ -387,6 +387,21 @@ module "heat-cfn" {
   }
 }
 
+resource "juju_integration" "heat-to-heat-cfn" {
+  count = var.enable-heat ? 1 : 0
+  model = juju_model.sunbeam.name
+
+  application {
+    name     = module.heat[count.index].name
+    endpoint = "heat-service"
+  }
+
+  application {
+    name     = module.heat-cfn[count.index].name
+    endpoint = "heat-config"
+  }
+}
+
 module "mysql-telemetry" {
   count      = var.enable-telemetry ? (var.many-mysql ? 1 : 0) : 0
   source     = "./modules/mysql"
