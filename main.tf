@@ -504,6 +504,21 @@ resource "juju_integration" "ceilometer-to-keystone" {
   }
 }
 
+resource "juju_integration" "ceilometer-to-gnocchi" {
+  count = var.enable-telemetry ? 1 : 0
+  model = juju_model.sunbeam.name
+
+  application {
+    name     = module.gnocchi[count.index].name
+    endpoint = "gnocchi-service"
+  }
+
+  application {
+    name     = juju_application.ceilometer[count.index].name
+    endpoint = "gnocchi-db"
+  }
+}
+
 resource "juju_offer" "ceilometer-offer" {
   count            = var.enable-telemetry ? 1 : 0
   model            = juju_model.sunbeam.name
