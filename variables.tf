@@ -31,7 +31,7 @@ variable "mysql-router-channel" {
 
 variable "rabbitmq-channel" {
   description = "Operator channel for RabbitMQ deployment"
-  default     = "3.9/stable"
+  default     = "3.12/edge"
 }
 
 variable "ovn-channel" {
@@ -94,4 +94,80 @@ variable "ingress-scale" {
 variable "many-mysql" {
   description = "Enabling this will switch architecture from one global mysql to one per service"
   default     = false
+}
+
+variable "enable-heat" {
+  description = "Enable OpenStack Heat service"
+  default     = false
+}
+
+# Temporary channel for heat until 2023.1/stable is released.
+variable "heat-channel" {
+  description = "Operator channel for OpenStack Heat deployment"
+  default     = "2023.1/edge"
+}
+
+variable "enable-telemetry" {
+  description = "Enable OpenStack Telemetry services"
+  default     = false
+}
+
+# Temporary channel for telemetry services until 2023.1/stable is released.
+variable "telemetry-channel" {
+  description = "Operator channel for OpenStack Telemetry deployment"
+  default     = "2023.1/edge"
+}
+
+variable "enable-octavia" {
+  description = "Enable OpenStack Octavia service"
+  default     = false
+}
+
+# Temporary channel for octavia until 2023.1/stable is released.
+variable "octavia-channel" {
+  description = "Operator channel for OpenStack Octavia deployment"
+  default     = "2023.1/edge"
+}
+variable "enable-designate" {
+  description = "Enable OpenStack Designate service"
+  default     = false
+}
+
+variable "designate-channel" {
+  description = "Operator channel for OpenStack Designate deployment"
+  default     = "2023.1/edge"
+}
+
+variable "bind-channel" {
+  description = "Operator channel for Bind deployment"
+  default     = "latest/edge"
+}
+
+variable "nameservers" {
+  description = <<-EOT
+    Space delimited list of nameservers. These are the nameservers that have been provided
+    to the domain registrar in order to delegate the domain to Designate.
+    e.g. "ns1.example.com. ns2.example.com."
+  EOT
+  default     = ""
+}
+
+variable "enable-vault" {
+  description = "Enable Vault service"
+  default     = false
+}
+
+variable "vault-channel" {
+  description = "Operator channel for Vault deployment"
+  default     = "latest/edge"
+}
+
+variable "enable-barbican" {
+  description = "Enable OpenStack Barbican service"
+  default     = false
+}
+
+variable "barbican-channel" {
+  description = "Operator channel for OpenStack Barbican deployment"
+  default     = "2023.1/edge"
 }

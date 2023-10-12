@@ -26,7 +26,6 @@ terraform {
 
 resource "juju_application" "service" {
   name  = var.name
-  trust = true
   model = var.model
 
   charm {
@@ -127,6 +126,21 @@ resource "juju_integration" "service-to-keystone" {
   application {
     name     = juju_application.service.name
     endpoint = "identity-credentials"
+  }
+}
+
+resource "juju_integration" "service-to-keystone-ops" {
+  for_each = var.keystone-ops == "" ? {} : { target = var.keystone-ops }
+  model    = var.model
+
+  application {
+    name     = each.value
+    endpoint = "identity-ops"
+  }
+
+  application {
+    name     = juju_application.service.name
+    endpoint = "identity-ops"
   }
 }
 
@@ -256,4 +270,11 @@ resource "juju_offer" "keystone-offer" {
   model            = var.model
   application_name = juju_application.service.name
   endpoint         = "identity-credentials"
+}
+
+resource "juju_offer" "cinder-ceph-offer" {
+  count            = var.name == "cinder-ceph" ? 1 : 0
+  model            = var.model
+  application_name = juju_application.service.name
+  endpoint         = "ceph-access"
 }
