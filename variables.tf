@@ -171,3 +171,13 @@ variable "barbican-channel" {
   description = "Operator channel for OpenStack Barbican deployment"
   default     = "2023.2/edge"
 }
+
+variable "enable-magnum" {
+  description = "Enable OpenStack Magnum service"
+  default     = false
+}
+
+variable "magnum-channel" {
+  description = "Operator channel for OpenStack Magnum deployment"
+  default     = "2023.2/edge"
+}

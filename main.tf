@@ -701,3 +701,34 @@ resource "juju_integration" "barbican-to-vault" {
     endpoint = "vault-kv"
   }
 }
+
+module "mysql-magnum" {
+  count      = var.enable-magnum ? (var.many-mysql ? 1 : 0) : 0
+  source     = "./modules/mysql"
+  model      = juju_model.sunbeam.name
+  name       = "mysql"
+  channel    = var.mysql-channel
+  scale      = var.ha-scale
+  many-mysql = var.many-mysql
+  services   = ["magnum"]
+}
+
+module "magnum" {
+  count                = var.enable-magnum ? 1 : 0
+  source               = "./modules/openstack-api"
+  charm                = "magnum-k8s"
+  name                 = "magnum"
+  model                = juju_model.sunbeam.name
+  channel              = var.magnum-channel
+  rabbitmq             = module.rabbitmq.name
+  mysql                = var.many-mysql ? module.mysql-magnum[0].name["magnum"] : "mysql"
+  keystone             = module.keystone.name
+  keystone-ops         = module.keystone.name
+  ingress-internal     = juju_application.traefik.name
+  ingress-public       = juju_application.traefik-public.name
+  scale                = var.os-api-scale
+  mysql-router-channel = var.mysql-router-channel
+  resource-configs = {
+    "cluster-user-trust" = "true"
+  }
+}
