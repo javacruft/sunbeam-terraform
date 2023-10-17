@@ -140,7 +140,7 @@ variable "designate-channel" {
 
 variable "bind-channel" {
   description = "Operator channel for Bind deployment"
-  default     = "latest/edge"
+  default     = "9/edge"
 }
 
 variable "nameservers" {

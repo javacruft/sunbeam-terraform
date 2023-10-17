@@ -591,7 +591,7 @@ resource "juju_application" "bind" {
   model = juju_model.sunbeam.name
 
   charm {
-    name    = "bind9-k8s"
+    name    = "designate-bind-k8s"
     channel = var.bind-channel
     series  = "jammy"
   }
