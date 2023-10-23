@@ -187,7 +187,7 @@ variable "ldap-channel" {
   default     = "2023.2/edge"
 }
 
-variable "ldap_apps" {
+variable "ldap-apps" {
   description = "LDAP Apps and their config flags"
   type        = map(map(string))
   default     = {}

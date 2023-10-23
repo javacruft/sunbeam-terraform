@@ -734,7 +734,7 @@ module "magnum" {
 }
 
 resource "juju_application" "ldap-apps" {
-  for_each = var.ldap_apps
+  for_each = var.ldap-apps
   name     = "keystone-ldap-${each.key}"
   model    = var.model
 
@@ -749,7 +749,7 @@ resource "juju_application" "ldap-apps" {
 }
 
 resource "juju_integration" "ldap-to-keystone" {
-  for_each = var.ldap_apps
+  for_each = var.ldap-apps
   model    = juju_model.sunbeam.name
 
   application {
