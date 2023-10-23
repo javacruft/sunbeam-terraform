@@ -734,7 +734,6 @@ module "magnum" {
 }
 
 resource "juju_application" "ldap-apps" {
-  #  Transform list of maps into a map of maps
   for_each = var.ldap_apps
   name     = "keystone-ldap-${each.key}"
   model    = var.model
@@ -759,7 +758,7 @@ resource "juju_integration" "ldap-to-keystone" {
   }
 
   application {
-    name     = "keystone"
+    name     = module.keystone.name
     endpoint = "domain-config"
   }
 }

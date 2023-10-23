@@ -188,7 +188,7 @@ variable "ldap-channel" {
 }
 
 variable "ldap_apps" {
-  description = "A list of LDAP Apps"
+  description = "LDAP Apps and their config flags"
   type        = map(map(string))
   default     = {}
 }
