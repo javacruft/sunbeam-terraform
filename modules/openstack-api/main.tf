@@ -181,6 +181,7 @@ resource "juju_application" "nova-api-mysql-router" {
   count = var.name == "nova" ? 1 : 0
   name  = "nova-api-mysql-router"
   model = var.model
+  trust = true
 
   charm {
     name    = "mysql-router-k8s"
@@ -225,6 +226,7 @@ resource "juju_application" "nova-cell-mysql-router" {
   count = var.name == "nova" ? 1 : 0
   name  = "nova-cell-mysql-router"
   model = var.model
+  trust = true
 
   charm {
     name    = "mysql-router-k8s"
