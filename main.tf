@@ -732,3 +732,33 @@ module "magnum" {
     "cluster-user-trust" = "true"
   }
 }
+
+resource "juju_application" "ldap-apps" {
+  for_each = var.ldap-apps
+  name     = "keystone-ldap-${each.key}"
+  model    = var.model
+
+  charm {
+    name    = "keystone-ldap-k8s"
+    channel = var.ldap-channel
+    series  = "jammy"
+  }
+  # This is a config charm so 1 unit is enough
+  units  = 1
+  config = each.value
+}
+
+resource "juju_integration" "ldap-to-keystone" {
+  for_each = var.ldap-apps
+  model    = juju_model.sunbeam.name
+
+  application {
+    name     = "keystone-ldap-${each.key}"
+    endpoint = "domain-config"
+  }
+
+  application {
+    name     = module.keystone.name
+    endpoint = "domain-config"
+  }
+}
