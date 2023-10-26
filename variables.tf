@@ -118,6 +118,16 @@ variable "telemetry-channel" {
   default     = "2023.2/edge"
 }
 
+variable "prometheus-metrics-offer-url" {
+  description = "Offer URL from prometheus-k8s:metrics-endpoint application"
+  default     = ""
+}
+
+variable "grafana-dashboard-offer-url" {
+  description = "Offer URL from grafana-k8s:grafana-dashboard application"
+  default     = ""
+}
+
 variable "enable-octavia" {
   description = "Enable OpenStack Octavia service"
   default     = false
