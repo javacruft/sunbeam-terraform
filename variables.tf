@@ -15,7 +15,7 @@
 
 variable "openstack-channel" {
   description = "Operator channel for OpenStack deployment"
-  default     = "2023.2/edge"
+  default     = "2023.2/candidate"
 }
 
 variable "mysql-channel" {
@@ -31,12 +31,12 @@ variable "mysql-router-channel" {
 
 variable "rabbitmq-channel" {
   description = "Operator channel for RabbitMQ deployment"
-  default     = "3.12/edge"
+  default     = "3.12/candidate"
 }
 
 variable "ovn-channel" {
   description = "Operator channel for OVN deployment"
-  default     = "23.09/edge"
+  default     = "23.09/candidate"
 }
 
 variable "model" {
@@ -101,10 +101,9 @@ variable "enable-heat" {
   default     = false
 }
 
-# Temporary channel for heat until 2023.2/stable is released.
 variable "heat-channel" {
   description = "Operator channel for OpenStack Heat deployment"
-  default     = "2023.2/edge"
+  default     = "2023.2/candidate"
 }
 
 variable "enable-telemetry" {
@@ -112,10 +111,9 @@ variable "enable-telemetry" {
   default     = false
 }
 
-# Temporary channel for telemetry services until 2023.2/stable is released.
 variable "telemetry-channel" {
   description = "Operator channel for OpenStack Telemetry deployment"
-  default     = "2023.2/edge"
+  default     = "2023.2/candidate"
 }
 
 variable "enable-octavia" {
@@ -123,10 +121,9 @@ variable "enable-octavia" {
   default     = false
 }
 
-# Temporary channel for octavia until 2023.2/stable is released.
 variable "octavia-channel" {
   description = "Operator channel for OpenStack Octavia deployment"
-  default     = "2023.2/edge"
+  default     = "2023.2/candidate"
 }
 variable "enable-designate" {
   description = "Enable OpenStack Designate service"
@@ -135,12 +132,12 @@ variable "enable-designate" {
 
 variable "designate-channel" {
   description = "Operator channel for OpenStack Designate deployment"
-  default     = "2023.2/edge"
+  default     = "2023.2/candidate"
 }
 
 variable "bind-channel" {
   description = "Operator channel for Bind deployment"
-  default     = "9/edge"
+  default     = "9/candidate"
 }
 
 variable "nameservers" {
@@ -169,7 +166,7 @@ variable "enable-barbican" {
 
 variable "barbican-channel" {
   description = "Operator channel for OpenStack Barbican deployment"
-  default     = "2023.2/edge"
+  default     = "2023.2/candidate"
 }
 
 variable "enable-magnum" {
@@ -179,12 +176,12 @@ variable "enable-magnum" {
 
 variable "magnum-channel" {
   description = "Operator channel for OpenStack Magnum deployment"
-  default     = "2023.2/edge"
+  default     = "2023.2/candidate"
 }
 
 variable "ldap-channel" {
   description = "Operator channel for Keystone LDAP deployment"
-  default     = "2023.2/edge"
+  default     = "2023.2/candidate"
 }
 
 variable "ldap-apps" {
