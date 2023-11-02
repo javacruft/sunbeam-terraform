@@ -601,7 +601,7 @@ module "octavia" {
   name                 = "octavia"
   model                = juju_model.sunbeam.name
   channel              = var.octavia-channel
-  mysql                = var.many-mysql ? module.mysql-octavia[0].name["heat"] : "mysql"
+  mysql                = var.many-mysql ? module.mysql-octavia[0].name["octavia"] : "mysql"
   keystone             = module.keystone.name
   keystone-ops         = module.keystone.name
   ingress-internal     = juju_application.traefik.name
