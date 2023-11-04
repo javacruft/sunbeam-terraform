@@ -24,6 +24,7 @@ jobs:
           sudo snap install --classic juju-wait
       - name: Apply terraform
         run: |
+          echo '{"enable-vault": true, "enable-barbican": true}' > terraform.tfvars.json
           terraform init
           terraform apply -auto-approve
           juju model-config -m openstack automatically-retry-hooks=true

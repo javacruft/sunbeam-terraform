@@ -709,7 +709,7 @@ resource "juju_application" "vault" {
   charm {
     name     = "vault-k8s"
     channel  = var.vault-channel
-    revision = 32
+    revision = 44
     series   = "jammy"
   }
 
