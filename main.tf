@@ -361,44 +361,39 @@ module "heat" {
   mysql                = var.many-mysql ? module.mysql-heat[0].name["heat"] : "mysql"
   keystone             = module.keystone.name
   keystone-ops         = module.keystone.name
-  ingress-internal     = juju_application.traefik.name
-  ingress-public       = juju_application.traefik-public.name
+  ingress-internal     = ""
+  ingress-public       = ""
   scale                = var.os-api-scale
   mysql-router-channel = var.mysql-router-channel
 }
 
-module "heat-cfn" {
-  count                = var.enable-heat ? 1 : 0
-  source               = "./modules/openstack-api"
-  charm                = "heat-k8s"
-  name                 = "heat-cfn"
-  model                = juju_model.sunbeam.name
-  channel              = var.heat-channel
-  rabbitmq             = module.rabbitmq.name
-  mysql                = var.many-mysql ? module.mysql-heat[0].name["heat"] : "mysql"
-  keystone             = module.keystone.name
-  keystone-ops         = module.keystone.name
-  ingress-internal     = juju_application.traefik.name
-  ingress-public       = juju_application.traefik-public.name
-  scale                = var.os-api-scale
-  mysql-router-channel = var.mysql-router-channel
-  resource-configs = {
-    api_service = "heat-api-cfn"
-  }
-}
-
-resource "juju_integration" "heat-to-heat-cfn" {
+resource "juju_integration" "heat-to-ingress-public" {
   count = var.enable-heat ? 1 : 0
   model = juju_model.sunbeam.name
 
   application {
     name     = module.heat[count.index].name
-    endpoint = "heat-service"
+    endpoint = "traefik-route-public"
   }
 
   application {
-    name     = module.heat-cfn[count.index].name
-    endpoint = "heat-config"
+    name     = juju_application.traefik-public.name
+    endpoint = "traefik-route"
+  }
+}
+
+resource "juju_integration" "heat-to-ingress-internal" {
+  count = var.enable-heat ? 1 : 0
+  model = juju_model.sunbeam.name
+
+  application {
+    name     = module.heat[count.index].name
+    endpoint = "traefik-route-internal"
+  }
+
+  application {
+    name     = juju_application.traefik.name
+    endpoint = "traefik-route"
   }
 }
 
