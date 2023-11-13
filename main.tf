@@ -361,44 +361,39 @@ module "heat" {
   mysql                = var.many-mysql ? module.mysql-heat[0].name["heat"] : "mysql"
   keystone             = module.keystone.name
   keystone-ops         = module.keystone.name
-  ingress-internal     = juju_application.traefik.name
-  ingress-public       = juju_application.traefik-public.name
+  ingress-internal     = ""
+  ingress-public       = ""
   scale                = var.os-api-scale
   mysql-router-channel = var.mysql-router-channel
 }
 
-module "heat-cfn" {
-  count                = var.enable-heat ? 1 : 0
-  source               = "./modules/openstack-api"
-  charm                = "heat-k8s"
-  name                 = "heat-cfn"
-  model                = juju_model.sunbeam.name
-  channel              = var.heat-channel
-  rabbitmq             = module.rabbitmq.name
-  mysql                = var.many-mysql ? module.mysql-heat[0].name["heat"] : "mysql"
-  keystone             = module.keystone.name
-  keystone-ops         = module.keystone.name
-  ingress-internal     = juju_application.traefik.name
-  ingress-public       = juju_application.traefik-public.name
-  scale                = var.os-api-scale
-  mysql-router-channel = var.mysql-router-channel
-  resource-configs = {
-    api_service = "heat-api-cfn"
-  }
-}
-
-resource "juju_integration" "heat-to-heat-cfn" {
+resource "juju_integration" "heat-to-ingress-public" {
   count = var.enable-heat ? 1 : 0
   model = juju_model.sunbeam.name
 
   application {
     name     = module.heat[count.index].name
-    endpoint = "heat-service"
+    endpoint = "traefik-route-public"
   }
 
   application {
-    name     = module.heat-cfn[count.index].name
-    endpoint = "heat-config"
+    name     = juju_application.traefik-public.name
+    endpoint = "traefik-route"
+  }
+}
+
+resource "juju_integration" "heat-to-ingress-internal" {
+  count = var.enable-heat ? 1 : 0
+  model = juju_model.sunbeam.name
+
+  application {
+    name     = module.heat[count.index].name
+    endpoint = "traefik-route-internal"
+  }
+
+  application {
+    name     = juju_application.traefik.name
+    endpoint = "traefik-route"
   }
 }
 
@@ -524,6 +519,63 @@ resource "juju_offer" "ceilometer-offer" {
   model            = juju_model.sunbeam.name
   application_name = juju_application.ceilometer[count.index].name
   endpoint         = "ceilometer-service"
+}
+
+resource "juju_application" "openstack-exporter" {
+  count = var.enable-telemetry ? 1 : 0
+  name  = "openstack-exporter"
+  model = juju_model.sunbeam.name
+
+  charm {
+    name    = "openstack-exporter-k8s"
+    channel = var.telemetry-channel
+    series  = "jammy"
+  }
+
+  units = 1
+}
+
+resource "juju_integration" "openstack-exporter-to-keystone" {
+  count = var.enable-telemetry ? 1 : 0
+  model = juju_model.sunbeam.name
+
+  application {
+    name     = module.keystone.name
+    endpoint = "identity-ops"
+  }
+
+  application {
+    name     = juju_application.openstack-exporter[count.index].name
+    endpoint = "identity-ops"
+  }
+}
+
+resource "juju_integration" "openstack-exporter-to-metrics-endpoint" {
+  count = (var.enable-telemetry && var.prometheus-metrics-offer-url != "") ? 1 : 0
+  model = juju_model.sunbeam.name
+
+  application {
+    name     = juju_application.openstack-exporter[count.index].name
+    endpoint = "metrics-endpoint"
+  }
+
+  application {
+    offer_url = var.prometheus-metrics-offer-url
+  }
+}
+
+resource "juju_integration" "openstack-exporter-to-grafana-dashboard" {
+  count = (var.enable-telemetry && var.grafana-dashboard-offer-url != "") ? 1 : 0
+  model = juju_model.sunbeam.name
+
+  application {
+    name     = juju_application.openstack-exporter[count.index].name
+    endpoint = "grafana-dashboard"
+  }
+
+  application {
+    offer_url = var.grafana-dashboard-offer-url
+  }
 }
 
 module "mysql-octavia" {
