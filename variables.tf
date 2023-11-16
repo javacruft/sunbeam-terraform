@@ -202,3 +202,9 @@ variable "ldap-apps" {
   type        = map(map(string))
   default     = {}
 }
+
+variable "horizon-plugins" {
+  description = "List of horizon plugin to enable."
+  type        = list(string)
+  default     = []
+}

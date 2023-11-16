@@ -127,6 +127,9 @@ module "horizon" {
   ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
   mysql-router-channel = var.mysql-router-channel
+  resource-configs = {
+    plugins = jsonencode(var.horizon-plugins)
+  }
 }
 
 module "neutron" {
