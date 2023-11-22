@@ -168,7 +168,7 @@ resource "juju_application" "traefik" {
 
   charm {
     name    = "traefik-k8s"
-    channel = "1.0/candidate"
+    channel = var.traefik-channel
     series  = "focal"
   }
 
@@ -182,7 +182,7 @@ resource "juju_application" "traefik-public" {
 
   charm {
     name    = "traefik-k8s"
-    channel = "1.0/candidate"
+    channel = var.traefik-channel
     series  = "focal"
   }
 
