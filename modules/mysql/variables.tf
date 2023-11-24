@@ -27,7 +27,7 @@ variable "channel" {
 
 variable "constraints" {
   description = "Constraints for MySQL K8S operator"
-  default     = "mem=2048M"
+  default     = "arch=amd64 mem=2048M"
   type        = string
 }
 

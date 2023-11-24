@@ -19,7 +19,7 @@ terraform {
   required_providers {
     juju = {
       source  = "juju/juju"
-      version = "= 0.8.0"
+      version = "= 0.10.0"
     }
   }
 }
@@ -169,7 +169,6 @@ resource "juju_application" "traefik" {
   charm {
     name    = "traefik-k8s"
     channel = var.traefik-channel
-    series  = "focal"
   }
 
   units = var.ingress-scale
@@ -183,7 +182,6 @@ resource "juju_application" "traefik-public" {
   charm {
     name    = "traefik-k8s"
     channel = var.traefik-channel
-    series  = "focal"
   }
 
   units = var.ingress-scale
@@ -197,7 +195,6 @@ resource "juju_application" "certificate-authority" {
   charm {
     name    = "self-signed-certificates"
     channel = "latest/beta"
-    series  = "jammy"
   }
 
   config = {
@@ -466,7 +463,6 @@ resource "juju_application" "ceilometer" {
   charm {
     name    = "ceilometer-k8s"
     channel = var.telemetry-channel
-    series  = "jammy"
   }
 
   units = var.ha-scale
@@ -532,7 +528,6 @@ resource "juju_application" "openstack-exporter" {
   charm {
     name    = "openstack-exporter-k8s"
     channel = var.telemetry-channel
-    series  = "jammy"
   }
 
   units = 1
@@ -648,7 +643,6 @@ resource "juju_application" "bind" {
   charm {
     name    = "designate-bind-k8s"
     channel = var.bind-channel
-    series  = "jammy"
   }
 
   units = var.ha-scale
@@ -708,7 +702,6 @@ resource "juju_application" "vault" {
     name     = "vault-k8s"
     channel  = var.vault-channel
     revision = 44
-    series   = "jammy"
   }
 
   units = 1
@@ -796,7 +789,6 @@ resource "juju_application" "ldap-apps" {
   charm {
     name    = "keystone-ldap-k8s"
     channel = var.ldap-channel
-    series  = "jammy"
   }
   # This is a config charm so 1 unit is enough
   units  = 1

@@ -19,7 +19,7 @@ terraform {
   required_providers {
     juju = {
       source  = "juju/juju"
-      version = ">= 0.7.0"
+      version = "= 0.10.0"
     }
   }
 }
@@ -31,7 +31,6 @@ resource "juju_application" "service" {
   charm {
     name    = var.charm
     channel = var.channel
-    series  = "jammy"
   }
 
   config = var.resource-configs
@@ -47,7 +46,6 @@ resource "juju_application" "mysql-router" {
   charm {
     name    = "mysql-router-k8s"
     channel = var.mysql-router-channel
-    series  = "jammy"
   }
 
   units = var.scale
@@ -186,7 +184,6 @@ resource "juju_application" "nova-api-mysql-router" {
   charm {
     name    = "mysql-router-k8s"
     channel = var.mysql-router-channel
-    series  = "jammy"
   }
 
   units = var.scale
@@ -231,7 +228,6 @@ resource "juju_application" "nova-cell-mysql-router" {
   charm {
     name    = "mysql-router-k8s"
     channel = var.mysql-router-channel
-    series  = "jammy"
   }
 
   units = var.scale
