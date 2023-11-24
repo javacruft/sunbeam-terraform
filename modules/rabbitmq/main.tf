@@ -19,7 +19,7 @@ terraform {
   required_providers {
     juju = {
       source  = "juju/juju"
-      version = ">= 0.4.1"
+      version = "= 0.10.0"
     }
   }
 }
@@ -33,7 +33,6 @@ resource "juju_application" "rabbitmq" {
   charm {
     name    = "rabbitmq-k8s"
     channel = var.channel
-    series  = "jammy"
   }
 
   units = var.scale

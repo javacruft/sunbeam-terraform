@@ -39,6 +39,11 @@ variable "ovn-channel" {
   default     = "23.09/candidate"
 }
 
+variable "traefik-channel" {
+  description = "Operator channel for traefik deployment"
+  default     = "1.0/candidate"
+}
+
 variable "model" {
   description = "Name of Juju model to use for deployment"
   default     = "openstack"
