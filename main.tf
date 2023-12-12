@@ -701,7 +701,7 @@ resource "juju_application" "vault" {
   charm {
     name     = "vault-k8s"
     channel  = var.vault-channel
-    revision = 44
+    revision = 61
   }
 
   units = 1
