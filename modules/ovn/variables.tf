@@ -14,9 +14,21 @@
 # limitations under the License.
 
 variable "channel" {
-  description = "Operator channel"
-  default     = "22.03/edge"
+  description = "Operator channel for OVN Central"
   type        = string
+  default     = "22.03/edge"
+}
+
+variable "revision" {
+  description = "Operator channel revision for OVN Central"
+  type        = number
+  default     = null
+}
+
+variable "resource-configs" {
+  description = "Operator config for OVN Central"
+  type        = map(string)
+  default     = {}
 }
 
 variable "scale" {
@@ -34,6 +46,24 @@ variable "relay" {
   description = "Enable OVN relay"
   type        = bool
   default     = true
+}
+
+variable "relay-channel" {
+  description = "Operator channel for OVN Relay"
+  type        = string
+  default     = "22.03/edge"
+}
+
+variable "relay-revision" {
+  description = "Operator channel revision for OVN Relay"
+  type        = number
+  default     = null
+}
+
+variable "relay-resource-configs" {
+  description = "Operator config for OVN Relay"
+  type        = map(string)
+  default     = {}
 }
 
 variable "relay-scale" {

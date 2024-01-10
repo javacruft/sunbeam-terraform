@@ -12,7 +12,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Setup operator environment
-        uses: charmed-kubernetes/actions-operator@main
+        # Use actions-operator@main once the below bugis fixed 
+        # https://github.com/charmed-kubernetes/actions-operator/issues/67
+        uses: charmed-kubernetes/actions-operator@f0f23fb5c81def7bf525a2940482191e4966a02a
         with:
           provider: microk8s
           channel: 1.28-strict/stable

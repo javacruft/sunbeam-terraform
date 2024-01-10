@@ -37,9 +37,9 @@ resource "juju_application" "rabbitmq" {
 
   units = var.scale
 
-  config = {
+  config = merge(var.resource-configs, {
     minimum-replicas = var.scale > 3 ? 3 : var.scale
-  }
+  })
 }
 
 

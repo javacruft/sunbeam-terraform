@@ -19,7 +19,7 @@ init:
 	terraform init
 
 check: init
-	terraform fmt -check
+	terraform fmt -check -recursive
 	terraform validate
 
 clean:

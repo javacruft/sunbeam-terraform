@@ -29,8 +29,9 @@ resource "juju_application" "service" {
   model = var.model
 
   charm {
-    name    = var.charm
-    channel = var.channel
+    name     = var.charm
+    channel  = var.channel
+    revision = var.revision
   }
 
   config = var.resource-configs

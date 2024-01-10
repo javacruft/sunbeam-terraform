@@ -29,11 +29,13 @@ resource "juju_application" "ovn-central" {
   model = var.model
 
   charm {
-    name    = "ovn-central-k8s"
-    channel = var.channel
+    name     = "ovn-central-k8s"
+    channel  = var.channel
+    revision = var.revision
   }
 
-  units = var.scale
+  config = var.resource-configs
+  units  = var.scale
 }
 
 resource "juju_application" "ovn-relay" {
@@ -43,11 +45,13 @@ resource "juju_application" "ovn-relay" {
   model = var.model
 
   charm {
-    name    = "ovn-relay-k8s"
-    channel = var.channel
+    name     = "ovn-relay-k8s"
+    channel  = var.relay-channel
+    revision = var.relay-revision
   }
 
-  units = var.relay-scale
+  config = var.relay-resource-configs
+  units  = var.relay-scale
 }
 
 
