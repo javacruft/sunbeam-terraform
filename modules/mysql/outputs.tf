@@ -16,5 +16,5 @@
 output "name" {
   description = "Map containing the name of the deployed MYSQL resource for specific service"
   # always outputs a map, even if there is only one mysql
-  value       = zipmap(var.services, var.many-mysql ? juju_application.mysql[*].name : [for _ in var.services: juju_application.mysql[0].name])
+  value = zipmap(var.services, var.many-mysql ? juju_application.mysql[*].name : [for _ in var.services : juju_application.mysql[0].name])
 }

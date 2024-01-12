@@ -48,20 +48,24 @@ resource "juju_model" "sunbeam" {
 }
 
 module "mysql" {
-  source     = "./modules/mysql"
-  model      = juju_model.sunbeam.name
-  name       = "mysql"
-  channel    = var.mysql-channel
-  scale      = var.ha-scale
-  many-mysql = var.many-mysql
-  services   = local.services-with-mysql
+  source           = "./modules/mysql"
+  model            = juju_model.sunbeam.name
+  name             = "mysql"
+  channel          = var.mysql-channel
+  revision         = var.mysql-revision
+  scale            = var.ha-scale
+  many-mysql       = var.many-mysql
+  services         = local.services-with-mysql
+  resource-configs = var.mysql-config
 }
 
 module "rabbitmq" {
-  source  = "./modules/rabbitmq"
-  model   = juju_model.sunbeam.name
-  scale   = var.ha-scale
-  channel = var.rabbitmq-channel
+  source           = "./modules/rabbitmq"
+  model            = juju_model.sunbeam.name
+  scale            = var.ha-scale
+  channel          = var.rabbitmq-channel
+  revision         = var.rabbitmq-revision
+  resource-configs = var.rabbitmq-config
 }
 
 module "glance" {
@@ -69,7 +73,8 @@ module "glance" {
   charm                = "glance-k8s"
   name                 = "glance"
   model                = juju_model.sunbeam.name
-  channel              = var.openstack-channel
+  channel              = var.glance-channel == null ? var.openstack-channel : var.glance-channel
+  revision             = var.glance-revision
   rabbitmq             = module.rabbitmq.name
   mysql                = module.mysql.name["glance"]
   keystone             = module.keystone.name
@@ -77,10 +82,10 @@ module "glance" {
   ingress-public       = juju_application.traefik-public.name
   scale                = var.enable-ceph ? var.os-api-scale : 1
   mysql-router-channel = var.mysql-router-channel
-  resource-configs = {
+  resource-configs = merge(var.glance-config, {
     ceph-osd-replication-count     = var.ceph-osd-replication-count
     enable-telemetry-notifications = var.enable-telemetry
-  }
+  })
 }
 
 module "keystone" {
@@ -88,16 +93,17 @@ module "keystone" {
   charm                = "keystone-k8s"
   name                 = "keystone"
   model                = juju_model.sunbeam.name
-  channel              = var.openstack-channel
+  channel              = var.keystone-channel == null ? var.openstack-channel : var.keystone-channel
+  revision             = var.keystone-revision
   rabbitmq             = module.rabbitmq.name
   mysql                = module.mysql.name["keystone"]
   ingress-internal     = juju_application.traefik.name
   ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
   mysql-router-channel = var.mysql-router-channel
-  resource-configs = {
+  resource-configs = merge(var.keystone-config, {
     enable-telemetry-notifications = var.enable-telemetry
-  }
+  })
 }
 
 module "nova" {
@@ -105,7 +111,8 @@ module "nova" {
   charm                = "nova-k8s"
   name                 = "nova"
   model                = juju_model.sunbeam.name
-  channel              = var.openstack-channel
+  channel              = var.nova-channel == null ? var.openstack-channel : var.nova-channel
+  revision             = var.nova-revision
   rabbitmq             = module.rabbitmq.name
   mysql                = module.mysql.name["nova"]
   keystone             = module.keystone.name
@@ -113,6 +120,7 @@ module "nova" {
   ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
   mysql-router-channel = var.mysql-router-channel
+  resource-configs     = var.nova-config
 }
 
 module "horizon" {
@@ -120,16 +128,17 @@ module "horizon" {
   charm                = "horizon-k8s"
   name                 = "horizon"
   model                = juju_model.sunbeam.name
-  channel              = var.openstack-channel
+  channel              = var.horizon-channel == null ? var.openstack-channel : var.horizon-channel
+  revision             = var.horizon-revision
   mysql                = module.mysql.name["horizon"]
   keystone-credentials = module.keystone.name
   ingress-internal     = juju_application.traefik.name
   ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
   mysql-router-channel = var.mysql-router-channel
-  resource-configs = {
+  resource-configs = merge(var.horizon-config, {
     plugins = jsonencode(var.horizon-plugins)
-  }
+  })
 }
 
 module "neutron" {
@@ -137,7 +146,8 @@ module "neutron" {
   charm                = "neutron-k8s"
   name                 = "neutron"
   model                = juju_model.sunbeam.name
-  channel              = var.openstack-channel
+  channel              = var.neutron-channel == null ? var.openstack-channel : var.neutron-channel
+  revision             = var.neutron-revision
   rabbitmq             = module.rabbitmq.name
   mysql                = module.mysql.name["neutron"]
   keystone             = module.keystone.name
@@ -145,6 +155,7 @@ module "neutron" {
   ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
   mysql-router-channel = var.mysql-router-channel
+  resource-configs     = var.neutron-config
 }
 
 module "placement" {
@@ -152,13 +163,15 @@ module "placement" {
   charm                = "placement-k8s"
   name                 = "placement"
   model                = juju_model.sunbeam.name
-  channel              = var.openstack-channel
+  channel              = var.placement-channel == null ? var.openstack-channel : var.placement-channel
+  revision             = var.placement-revision
   mysql                = module.mysql.name["placement"]
   keystone             = module.keystone.name
   ingress-internal     = juju_application.traefik.name
   ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
   mysql-router-channel = var.mysql-router-channel
+  resource-configs     = var.placement-config
 }
 
 resource "juju_application" "traefik" {
@@ -167,11 +180,13 @@ resource "juju_application" "traefik" {
   model = juju_model.sunbeam.name
 
   charm {
-    name    = "traefik-k8s"
-    channel = var.traefik-channel
+    name     = "traefik-k8s"
+    channel  = var.traefik-channel
+    revision = var.traefik-revision
   }
 
-  units = var.ingress-scale
+  config = var.traefik-config
+  units  = var.ingress-scale
 }
 
 resource "juju_application" "traefik-public" {
@@ -180,11 +195,13 @@ resource "juju_application" "traefik-public" {
   model = juju_model.sunbeam.name
 
   charm {
-    name    = "traefik-k8s"
-    channel = var.traefik-channel
+    name     = "traefik-k8s"
+    channel  = var.traefik-channel
+    revision = var.traefik-revision
   }
 
-  units = var.ingress-scale
+  config = var.traefik-config
+  units  = var.ingress-scale
 }
 
 resource "juju_application" "certificate-authority" {
@@ -193,23 +210,29 @@ resource "juju_application" "certificate-authority" {
   model = juju_model.sunbeam.name
 
   charm {
-    name    = "self-signed-certificates"
-    channel = "latest/beta"
+    name     = "self-signed-certificates"
+    channel  = var.certificate-authority-channel
+    revision = var.certificate-authority-revision
   }
 
-  config = {
+  config = merge(var.certificate-authority-config, {
     ca-common-name = "internal-ca"
-  }
+  })
 }
 
 module "ovn" {
-  source      = "./modules/ovn"
-  model       = juju_model.sunbeam.name
-  channel     = var.ovn-channel
-  scale       = var.ha-scale
-  relay       = true
-  relay-scale = var.os-api-scale
-  ca          = juju_application.certificate-authority.name
+  source                 = "./modules/ovn"
+  model                  = juju_model.sunbeam.name
+  channel                = var.ovn-central-channel == null ? var.ovn-channel : var.ovn-central-channel
+  revision               = var.ovn-central-revision
+  scale                  = var.ha-scale
+  relay                  = true
+  relay-scale            = var.os-api-scale
+  relay-channel          = var.ovn-relay-channel == null ? var.ovn-channel : var.ovn-relay-channel
+  relay-revision         = var.ovn-relay-revision
+  ca                     = juju_application.certificate-authority.name
+  resource-configs       = var.ovn-central-config
+  relay-resource-configs = var.ovn-relay-config
 }
 
 # juju integrate ovn-central neutron
@@ -277,7 +300,8 @@ module "cinder" {
   charm                = "cinder-k8s"
   name                 = "cinder"
   model                = juju_model.sunbeam.name
-  channel              = var.openstack-channel
+  channel              = var.cinder-channel == null ? var.openstack-channel : var.cinder-channel
+  revision             = var.cinder-revision
   rabbitmq             = module.rabbitmq.name
   mysql                = module.mysql.name["cinder"]
   keystone             = module.keystone.name
@@ -285,24 +309,26 @@ module "cinder" {
   ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
   mysql-router-channel = var.mysql-router-channel
+  resource-configs     = var.cinder-config
 }
 
 module "cinder-ceph" {
-  source           = "./modules/openstack-api"
-  charm            = "cinder-ceph-k8s"
-  name             = "cinder-ceph"
-  model            = juju_model.sunbeam.name
-  channel          = var.openstack-channel
-  rabbitmq         = module.rabbitmq.name
-  mysql            = module.mysql.name["cinder"]
-  ingress-internal = ""
-  ingress-public   = ""
-  scale            = var.ha-scale
-  resource-configs = {
+  source               = "./modules/openstack-api"
+  charm                = "cinder-ceph-k8s"
+  name                 = "cinder-ceph"
+  model                = juju_model.sunbeam.name
+  channel              = var.cinder-ceph-channel == null ? var.openstack-channel : var.cinder-ceph-channel
+  revision             = var.cinder-ceph-revision
+  rabbitmq             = module.rabbitmq.name
+  mysql                = module.mysql.name["cinder"]
+  ingress-internal     = ""
+  ingress-public       = ""
+  scale                = var.ha-scale
+  mysql-router-channel = var.mysql-router-channel
+  resource-configs = merge(var.cinder-ceph-config, {
     ceph-osd-replication-count     = var.ceph-osd-replication-count
     enable-telemetry-notifications = var.enable-telemetry
-  }
-  mysql-router-channel = var.mysql-router-channel
+  })
 }
 
 # juju integrate cinder cinder-ceph
@@ -340,14 +366,16 @@ resource "juju_offer" "ca-offer" {
 }
 
 module "mysql-heat" {
-  count      = var.enable-heat ? (var.many-mysql ? 1 : 0) : 0
-  source     = "./modules/mysql"
-  model      = juju_model.sunbeam.name
-  name       = "mysql"
-  channel    = var.mysql-channel
-  scale      = var.ha-scale
-  many-mysql = var.many-mysql
-  services   = ["heat"]
+  count            = var.enable-heat ? (var.many-mysql ? 1 : 0) : 0
+  source           = "./modules/mysql"
+  model            = juju_model.sunbeam.name
+  name             = "mysql"
+  channel          = var.mysql-channel
+  revision         = var.mysql-revision
+  scale            = var.ha-scale
+  many-mysql       = var.many-mysql
+  services         = ["heat"]
+  resource-configs = var.mysql-config
 }
 
 module "heat" {
@@ -356,7 +384,8 @@ module "heat" {
   charm                = "heat-k8s"
   name                 = "heat"
   model                = juju_model.sunbeam.name
-  channel              = var.heat-channel
+  channel              = var.heat-channel == null ? var.openstack-channel : var.heat-channel
+  revision             = var.heat-revision
   rabbitmq             = module.rabbitmq.name
   mysql                = var.many-mysql ? module.mysql-heat[0].name["heat"] : "mysql"
   keystone             = module.keystone.name
@@ -365,6 +394,7 @@ module "heat" {
   ingress-public       = ""
   scale                = var.os-api-scale
   mysql-router-channel = var.mysql-router-channel
+  resource-configs     = var.heat-config
 }
 
 resource "juju_integration" "heat-to-ingress-public" {
@@ -398,14 +428,16 @@ resource "juju_integration" "heat-to-ingress-internal" {
 }
 
 module "mysql-telemetry" {
-  count      = var.enable-telemetry ? (var.many-mysql ? 1 : 0) : 0
-  source     = "./modules/mysql"
-  model      = juju_model.sunbeam.name
-  name       = "mysql"
-  channel    = var.mysql-channel
-  scale      = var.ha-scale
-  many-mysql = var.many-mysql
-  services   = ["aodh", "gnocchi"]
+  count            = var.enable-telemetry ? (var.many-mysql ? 1 : 0) : 0
+  source           = "./modules/mysql"
+  model            = juju_model.sunbeam.name
+  name             = "mysql"
+  channel          = var.mysql-channel
+  revision         = var.mysql-revision
+  scale            = var.ha-scale
+  many-mysql       = var.many-mysql
+  services         = ["aodh", "gnocchi"]
+  resource-configs = var.mysql-config
 }
 
 module "aodh" {
@@ -414,7 +446,8 @@ module "aodh" {
   charm                = "aodh-k8s"
   name                 = "aodh"
   model                = juju_model.sunbeam.name
-  channel              = var.telemetry-channel
+  channel              = var.aodh-channel == null ? var.openstack-channel : var.aodh-channel
+  revision             = var.aodh-revision
   rabbitmq             = module.rabbitmq.name
   mysql                = var.many-mysql ? module.mysql-telemetry[0].name["aodh"] : "mysql"
   keystone             = module.keystone.name
@@ -422,6 +455,7 @@ module "aodh" {
   ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
   mysql-router-channel = var.mysql-router-channel
+  resource-configs     = var.aodh-config
 }
 
 module "gnocchi" {
@@ -430,16 +464,17 @@ module "gnocchi" {
   charm                = "gnocchi-k8s"
   name                 = "gnocchi"
   model                = juju_model.sunbeam.name
-  channel              = var.telemetry-channel
+  channel              = var.gnocchi-channel == null ? var.openstack-channel : var.gnocchi-channel
+  revision             = var.gnocchi-revision
   mysql                = var.many-mysql ? module.mysql-telemetry[0].name["gnocchi"] : "mysql"
   keystone             = module.keystone.name
   ingress-internal     = juju_application.traefik.name
   ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
   mysql-router-channel = var.mysql-router-channel
-  resource-configs = {
+  resource-configs = merge(var.gnocchi-config, {
     ceph-osd-replication-count = var.ceph-osd-replication-count
-  }
+  })
 }
 
 # juju integrate gnocchi microceph
@@ -461,11 +496,13 @@ resource "juju_application" "ceilometer" {
   model = juju_model.sunbeam.name
 
   charm {
-    name    = "ceilometer-k8s"
-    channel = var.telemetry-channel
+    name     = "ceilometer-k8s"
+    channel  = var.ceilometer-channel == null ? var.openstack-channel : var.ceilometer-channel
+    revision = var.ceilometer-revision
   }
 
-  units = var.ha-scale
+  config = var.ceilometer-config
+  units  = var.ha-scale
 }
 
 resource "juju_integration" "ceilometer-to-rabbitmq" {
@@ -526,11 +563,13 @@ resource "juju_application" "openstack-exporter" {
   model = juju_model.sunbeam.name
 
   charm {
-    name    = "openstack-exporter-k8s"
-    channel = var.telemetry-channel
+    name     = "openstack-exporter-k8s"
+    channel  = var.openstack-exporter-channel == null ? var.openstack-channel : var.openstack-exporter-channel
+    revision = var.openstack-exporter-channel
   }
 
-  units = 1
+  config = var.openstack-exporter-config
+  units  = 1
 }
 
 resource "juju_integration" "openstack-exporter-to-keystone" {
@@ -577,14 +616,16 @@ resource "juju_integration" "openstack-exporter-to-grafana-dashboard" {
 }
 
 module "mysql-octavia" {
-  count      = var.enable-octavia ? (var.many-mysql ? 1 : 0) : 0
-  source     = "./modules/mysql"
-  model      = juju_model.sunbeam.name
-  name       = "mysql"
-  channel    = var.mysql-channel
-  scale      = var.ha-scale
-  many-mysql = var.many-mysql
-  services   = ["octavia"]
+  count            = var.enable-octavia ? (var.many-mysql ? 1 : 0) : 0
+  source           = "./modules/mysql"
+  model            = juju_model.sunbeam.name
+  name             = "mysql"
+  channel          = var.mysql-channel
+  revision         = var.mysql-revision
+  scale            = var.ha-scale
+  many-mysql       = var.many-mysql
+  services         = ["octavia"]
+  resource-configs = var.mysql-config
 }
 
 module "octavia" {
@@ -593,7 +634,8 @@ module "octavia" {
   charm                = "octavia-k8s"
   name                 = "octavia"
   model                = juju_model.sunbeam.name
-  channel              = var.octavia-channel
+  channel              = var.octavia-channel == null ? var.openstack-channel : var.octavia-channel
+  revision             = var.octavia-revision
   mysql                = var.many-mysql ? module.mysql-octavia[0].name["octavia"] : "mysql"
   keystone             = module.keystone.name
   keystone-ops         = module.keystone.name
@@ -601,6 +643,7 @@ module "octavia" {
   ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
   mysql-router-channel = var.mysql-router-channel
+  resource-configs     = var.octavia-config
 }
 
 # juju integrate ovn-central octavia
@@ -641,22 +684,26 @@ resource "juju_application" "bind" {
   model = juju_model.sunbeam.name
 
   charm {
-    name    = "designate-bind-k8s"
-    channel = var.bind-channel
+    name     = "designate-bind-k8s"
+    channel  = var.bind-channel
+    revision = var.bind-revision
   }
 
-  units = var.ha-scale
+  config = var.bind-config
+  units  = var.ha-scale
 }
 
 module "mysql-designate" {
-  count      = var.enable-designate ? (var.many-mysql ? 1 : 0) : 0
-  source     = "./modules/mysql"
-  model      = juju_model.sunbeam.name
-  name       = "mysql"
-  channel    = var.mysql-channel
-  scale      = var.ha-scale
-  many-mysql = var.many-mysql
-  services   = ["designate"]
+  count            = var.enable-designate ? (var.many-mysql ? 1 : 0) : 0
+  source           = "./modules/mysql"
+  model            = juju_model.sunbeam.name
+  name             = "mysql"
+  channel          = var.mysql-channel
+  revision         = var.mysql-revision
+  scale            = var.ha-scale
+  many-mysql       = var.many-mysql
+  services         = ["designate"]
+  resource-configs = var.mysql-config
 }
 
 module "designate" {
@@ -666,6 +713,7 @@ module "designate" {
   name                 = "designate"
   model                = juju_model.sunbeam.name
   channel              = var.designate-channel
+  revision             = var.designate-revision
   rabbitmq             = module.rabbitmq.name
   mysql                = var.many-mysql ? module.mysql-designate[0].name["designate"] : "mysql"
   keystone             = module.keystone.name
@@ -673,9 +721,9 @@ module "designate" {
   ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
   mysql-router-channel = var.mysql-router-channel
-  resource-configs = {
+  resource-configs = merge(var.designate-config, {
     "nameservers" = var.nameservers
-  }
+  })
 }
 
 resource "juju_integration" "designate-to-bind" {
@@ -701,21 +749,24 @@ resource "juju_application" "vault" {
   charm {
     name     = "vault-k8s"
     channel  = var.vault-channel
-    revision = 61
+    revision = var.vault-revision
   }
 
-  units = 1
+  config = var.vault-config
+  units  = 1
 }
 
 module "mysql-barbican" {
-  count      = var.enable-barbican ? (var.many-mysql ? 1 : 0) : 0
-  source     = "./modules/mysql"
-  model      = juju_model.sunbeam.name
-  name       = "mysql"
-  channel    = var.mysql-channel
-  scale      = var.ha-scale
-  many-mysql = var.many-mysql
-  services   = ["barbican"]
+  count            = var.enable-barbican ? (var.many-mysql ? 1 : 0) : 0
+  source           = "./modules/mysql"
+  model            = juju_model.sunbeam.name
+  name             = "mysql"
+  channel          = var.mysql-channel
+  revision         = var.mysql-revision
+  scale            = var.ha-scale
+  many-mysql       = var.many-mysql
+  services         = ["barbican"]
+  resource-configs = var.mysql-config
 }
 
 module "barbican" {
@@ -724,7 +775,8 @@ module "barbican" {
   charm                = "barbican-k8s"
   name                 = "barbican"
   model                = juju_model.sunbeam.name
-  channel              = var.barbican-channel
+  channel              = var.barbican-channel == null ? var.openstack-channel : var.barbican-channel
+  revision             = var.barbican-revision
   rabbitmq             = module.rabbitmq.name
   mysql                = var.many-mysql ? module.mysql-barbican[0].name["barbican"] : "mysql"
   keystone             = module.keystone.name
@@ -733,6 +785,7 @@ module "barbican" {
   ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
   mysql-router-channel = var.mysql-router-channel
+  resource-configs     = var.barbican-config
 }
 
 resource "juju_integration" "barbican-to-vault" {
@@ -751,14 +804,16 @@ resource "juju_integration" "barbican-to-vault" {
 }
 
 module "mysql-magnum" {
-  count      = var.enable-magnum ? (var.many-mysql ? 1 : 0) : 0
-  source     = "./modules/mysql"
-  model      = juju_model.sunbeam.name
-  name       = "mysql"
-  channel    = var.mysql-channel
-  scale      = var.ha-scale
-  many-mysql = var.many-mysql
-  services   = ["magnum"]
+  count            = var.enable-magnum ? (var.many-mysql ? 1 : 0) : 0
+  source           = "./modules/mysql"
+  model            = juju_model.sunbeam.name
+  name             = "mysql"
+  channel          = var.mysql-channel
+  revision         = var.mysql-revision
+  scale            = var.ha-scale
+  many-mysql       = var.many-mysql
+  services         = ["magnum"]
+  resource-configs = var.mysql-config
 }
 
 module "magnum" {
@@ -767,7 +822,8 @@ module "magnum" {
   charm                = "magnum-k8s"
   name                 = "magnum"
   model                = juju_model.sunbeam.name
-  channel              = var.magnum-channel
+  channel              = var.magnum-channel == null ? var.openstack-channel : var.magnum-channel
+  revision             = var.magnum-revision
   rabbitmq             = module.rabbitmq.name
   mysql                = var.many-mysql ? module.mysql-magnum[0].name["magnum"] : "mysql"
   keystone             = module.keystone.name
@@ -776,9 +832,9 @@ module "magnum" {
   ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
   mysql-router-channel = var.mysql-router-channel
-  resource-configs = {
+  resource-configs = merge(var.magnum-config, {
     "cluster-user-trust" = "true"
-  }
+  })
 }
 
 resource "juju_application" "ldap-apps" {
@@ -787,8 +843,9 @@ resource "juju_application" "ldap-apps" {
   model    = var.model
 
   charm {
-    name    = "keystone-ldap-k8s"
-    channel = var.ldap-channel
+    name     = "keystone-ldap-k8s"
+    channel  = var.ldap-channel
+    revision = var.ldap-revision
   }
   # This is a config charm so 1 unit is enough
   units  = 1

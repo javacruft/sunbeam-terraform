@@ -15,21 +15,35 @@
 
 variable "name" {
   description = "Name of the deployed RabbitMQ K8S operator"
-  default     = "rabbitmq"
   type        = string
+  default     = "rabbitmq"
 }
 
 variable "channel" {
   description = "RabbitMQ K8S charm channel"
-  default     = "latest/edge"
   type        = string
+  default     = "latest/edge"
+}
+
+variable "revision" {
+  description = "RabbitMQ K8S charm channel revision"
+  type        = number
+  default     = null
 }
 
 variable "scale" {
   description = "Scale of RabbitMQ charm"
+  type        = number
   default     = 1
 }
 
 variable "model" {
   description = "Juju model to deploy resources in"
+  type        = string
+}
+
+variable "resource-configs" {
+  description = "Configs to set for mysql"
+  type        = map(string)
+  default     = {}
 }
