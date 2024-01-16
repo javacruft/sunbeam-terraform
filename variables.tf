@@ -674,3 +674,52 @@ variable "enable-tls-for-internal-endpoint" {
   type        = bool
   default     = false
 }
+
+
+variable "enable-validation" {
+  description = "Enable Tempest deployment"
+  type        = bool
+  default     = false
+}
+
+variable "tempest-channel" {
+  description = "Operator channel for Tempest deployment"
+  type        = string
+  default     = null
+}
+
+variable "tempest-revision" {
+  description = "Operator channel revision for Tempest deployment"
+  type        = number
+  default     = null
+}
+
+variable "tempest-config" {
+  description = "Operator config for Tempest deployment"
+  type        = map(string)
+  default     = {}
+}
+
+variable "grafana-agent-k8s-name" {
+  description = "Operator name for Grafana Agent K8s deployment"
+  type        = string
+  default     = "grafana-agent-k8s"
+}
+
+variable "metrics-endpoint" {
+  description = "Endpoint name for grafana-agent-k8s:metric_endpoint"
+  type        = string
+  default     = null
+}
+
+variable "logging-provider" {
+  description = "Endpoint name for grafana-agent-k8s:logging-provider"
+  type        = string
+  default     = null
+}
+
+variable "grafana-dashboards-consumer" {
+  description = "Endpoint name for grafana-agent-k8s:grafana-dashboards-consumer"
+  type        = string
+  default     = null
+}
