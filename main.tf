@@ -565,7 +565,7 @@ resource "juju_application" "openstack-exporter" {
   charm {
     name     = "openstack-exporter-k8s"
     channel  = var.openstack-exporter-channel == null ? var.openstack-channel : var.openstack-exporter-channel
-    revision = var.openstack-exporter-channel
+    revision = var.openstack-exporter-revision
   }
 
   config = var.openstack-exporter-config
