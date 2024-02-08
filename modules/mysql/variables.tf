@@ -34,7 +34,7 @@ variable "revision" {
 variable "constraints" {
   description = "Constraints for MySQL K8S operator"
   type        = string
-  default     = "arch=amd64 mem=2048M"
+  default     = null
 }
 
 variable "scale" {
