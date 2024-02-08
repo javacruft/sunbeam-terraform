@@ -34,7 +34,9 @@ variable "mysql-revision" {
 variable "mysql-config" {
   description = "Operator configs for MySQL deployment"
   type        = map(string)
-  default     = {}
+  default = {
+    "profile-limit-memory" = 2148
+  }
 }
 
 variable "mysql-router-channel" {
