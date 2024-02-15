@@ -143,6 +143,21 @@ resource "juju_integration" "service-to-keystone-ops" {
   }
 }
 
+resource "juju_integration" "service-to-keystone-cacerts" {
+  for_each = var.keystone-cacerts == "" ? {} : { target = var.keystone-cacerts }
+  model    = var.model
+
+  application {
+    name     = each.value
+    endpoint = "send-ca-cert"
+  }
+
+  application {
+    name     = juju_application.service.name
+    endpoint = "receive-ca-cert"
+  }
+}
+
 # juju integrate traefik-public glance
 resource "juju_integration" "traefik-public-to-service" {
   for_each = var.ingress-public == "" ? {} : { target = var.ingress-public }
@@ -276,4 +291,12 @@ resource "juju_offer" "cinder-ceph-offer" {
   model            = var.model
   application_name = juju_application.service.name
   endpoint         = "ceph-access"
+}
+
+resource "juju_offer" "cert-distributor-offer" {
+  count            = var.name == "keystone" ? 1 : 0
+  model            = var.model
+  application_name = juju_application.service.name
+  endpoint         = "send-ca-cert"
+  name             = "cert-distributor"
 }

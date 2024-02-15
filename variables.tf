@@ -638,3 +638,39 @@ variable "horizon-plugins" {
   type        = list(string)
   default     = []
 }
+
+variable "traefik-to-tls-provider" {
+  description = "Application name providing the certificates endpoint traefik will be integrated with"
+  type        = string
+  default     = null
+}
+
+variable "manual-tls-certificates-channel" {
+  description = "Operator channel for Manual Tls Certificates deployment"
+  type        = string
+  default     = "latest/stable"
+}
+
+variable "manual-tls-certificates-revision" {
+  description = "Operator channel revision for Manual Tls Certificates deployment"
+  type        = number
+  default     = null
+}
+
+variable "manual-tls-certificates-config" {
+  description = "Operator config for Manual Tls Certificates deployment"
+  type        = map(string)
+  default     = {}
+}
+
+variable "enable-tls-for-public-endpoint" {
+  description = "Enable TLS for traefik-public"
+  type        = bool
+  default     = false
+}
+
+variable "enable-tls-for-internal-endpoint" {
+  description = "Enable TLS for traefik"
+  type        = bool
+  default     = false
+}
