@@ -78,6 +78,7 @@ module "glance" {
   rabbitmq             = module.rabbitmq.name
   mysql                = module.mysql.name["glance"]
   keystone             = module.keystone.name
+  keystone-cacerts     = module.keystone.name
   ingress-internal     = juju_application.traefik.name
   ingress-public       = juju_application.traefik-public.name
   scale                = var.enable-ceph ? var.os-api-scale : 1
@@ -116,6 +117,7 @@ module "nova" {
   rabbitmq             = module.rabbitmq.name
   mysql                = module.mysql.name["nova"]
   keystone             = module.keystone.name
+  keystone-cacerts     = module.keystone.name
   ingress-internal     = juju_application.traefik.name
   ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
@@ -132,6 +134,7 @@ module "horizon" {
   revision             = var.horizon-revision
   mysql                = module.mysql.name["horizon"]
   keystone-credentials = module.keystone.name
+  keystone-cacerts     = module.keystone.name
   ingress-internal     = juju_application.traefik.name
   ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
@@ -151,6 +154,7 @@ module "neutron" {
   rabbitmq             = module.rabbitmq.name
   mysql                = module.mysql.name["neutron"]
   keystone             = module.keystone.name
+  keystone-cacerts     = module.keystone.name
   ingress-internal     = juju_application.traefik.name
   ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
@@ -167,6 +171,7 @@ module "placement" {
   revision             = var.placement-revision
   mysql                = module.mysql.name["placement"]
   keystone             = module.keystone.name
+  keystone-cacerts     = module.keystone.name
   ingress-internal     = juju_application.traefik.name
   ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
@@ -305,6 +310,7 @@ module "cinder" {
   rabbitmq             = module.rabbitmq.name
   mysql                = module.mysql.name["cinder"]
   keystone             = module.keystone.name
+  keystone-cacerts     = module.keystone.name
   ingress-internal     = juju_application.traefik.name
   ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
@@ -390,6 +396,7 @@ module "heat" {
   mysql                = var.many-mysql ? module.mysql-heat[0].name["heat"] : "mysql"
   keystone             = module.keystone.name
   keystone-ops         = module.keystone.name
+  keystone-cacerts     = module.keystone.name
   ingress-internal     = ""
   ingress-public       = ""
   scale                = var.os-api-scale
@@ -451,6 +458,7 @@ module "aodh" {
   rabbitmq             = module.rabbitmq.name
   mysql                = var.many-mysql ? module.mysql-telemetry[0].name["aodh"] : "mysql"
   keystone             = module.keystone.name
+  keystone-cacerts     = module.keystone.name
   ingress-internal     = juju_application.traefik.name
   ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
@@ -468,6 +476,7 @@ module "gnocchi" {
   revision             = var.gnocchi-revision
   mysql                = var.many-mysql ? module.mysql-telemetry[0].name["gnocchi"] : "mysql"
   keystone             = module.keystone.name
+  keystone-cacerts     = module.keystone.name
   ingress-internal     = juju_application.traefik.name
   ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
@@ -535,6 +544,21 @@ resource "juju_integration" "ceilometer-to-keystone" {
   }
 }
 
+resource "juju_integration" "ceilometer-to-keystone-cacert" {
+  count = var.enable-telemetry ? 1 : 0
+  model = juju_model.sunbeam.name
+
+  application {
+    name     = module.keystone.name
+    endpoint = "send-ca-cert"
+  }
+
+  application {
+    name     = juju_application.ceilometer[count.index].name
+    endpoint = "receive-ca-cert"
+  }
+}
+
 resource "juju_integration" "ceilometer-to-gnocchi" {
   count = var.enable-telemetry ? 1 : 0
   model = juju_model.sunbeam.name
@@ -584,6 +608,21 @@ resource "juju_integration" "openstack-exporter-to-keystone" {
   application {
     name     = juju_application.openstack-exporter[count.index].name
     endpoint = "identity-ops"
+  }
+}
+
+resource "juju_integration" "openstack-exporter-to-keystone-cacert" {
+  count = var.enable-telemetry ? 1 : 0
+  model = juju_model.sunbeam.name
+
+  application {
+    name     = module.keystone.name
+    endpoint = "send-ca-cert"
+  }
+
+  application {
+    name     = juju_application.openstack-exporter[count.index].name
+    endpoint = "receive-ca-cert"
   }
 }
 
@@ -639,6 +678,7 @@ module "octavia" {
   mysql                = var.many-mysql ? module.mysql-octavia[0].name["octavia"] : "mysql"
   keystone             = module.keystone.name
   keystone-ops         = module.keystone.name
+  keystone-cacerts     = module.keystone.name
   ingress-internal     = juju_application.traefik.name
   ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
@@ -717,6 +757,7 @@ module "designate" {
   rabbitmq             = module.rabbitmq.name
   mysql                = var.many-mysql ? module.mysql-designate[0].name["designate"] : "mysql"
   keystone             = module.keystone.name
+  keystone-cacerts     = module.keystone.name
   ingress-internal     = juju_application.traefik.name
   ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
@@ -781,6 +822,7 @@ module "barbican" {
   mysql                = var.many-mysql ? module.mysql-barbican[0].name["barbican"] : "mysql"
   keystone             = module.keystone.name
   keystone-ops         = module.keystone.name
+  keystone-cacerts     = module.keystone.name
   ingress-internal     = juju_application.traefik.name
   ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
@@ -828,6 +870,7 @@ module "magnum" {
   mysql                = var.many-mysql ? module.mysql-magnum[0].name["magnum"] : "mysql"
   keystone             = module.keystone.name
   keystone-ops         = module.keystone.name
+  keystone-cacerts     = module.keystone.name
   ingress-internal     = juju_application.traefik.name
   ingress-public       = juju_application.traefik-public.name
   scale                = var.os-api-scale
@@ -864,5 +907,50 @@ resource "juju_integration" "ldap-to-keystone" {
   application {
     name     = module.keystone.name
     endpoint = "domain-config"
+  }
+}
+
+resource "juju_application" "manual-tls-certificates" {
+  count = (var.traefik-to-tls-provider == "manual-tls-certificates") ? 1 : 0
+  name  = "manual-tls-certificates"
+  model = juju_model.sunbeam.name
+
+  charm {
+    name     = "manual-tls-certificates"
+    channel  = var.manual-tls-certificates-channel
+    revision = var.manual-tls-certificates-revision
+  }
+
+  units  = 1 # does not scale
+  config = var.manual-tls-certificates-config
+}
+
+resource "juju_integration" "traefik-public-to-tls-provider" {
+  count = var.enable-tls-for-public-endpoint ? (var.traefik-to-tls-provider == null ? 0 : 1) : 0
+  model = juju_model.sunbeam.name
+
+  application {
+    name     = juju_application.traefik-public.name
+    endpoint = "certificates"
+  }
+
+  application {
+    name     = var.traefik-to-tls-provider
+    endpoint = "certificates"
+  }
+}
+
+resource "juju_integration" "traefik-to-tls-provider" {
+  count = var.enable-tls-for-internal-endpoint ? (var.traefik-to-tls-provider == null ? 0 : 1) : 0
+  model = juju_model.sunbeam.name
+
+  application {
+    name     = juju_application.traefik.name
+    endpoint = "certificates"
+  }
+
+  application {
+    name     = var.traefik-to-tls-provider
+    endpoint = "certificates"
   }
 }
