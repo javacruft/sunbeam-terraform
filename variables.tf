@@ -455,16 +455,22 @@ variable "openstack-exporter-config" {
   default     = {}
 }
 
-variable "prometheus-metrics-offer-url" {
-  description = "Offer URL from prometheus-k8s:metrics-endpoint application"
+variable "receive-remote-write-offer-url" {
+  description = "Offer URL from prometheus-k8s:receive-remote-write application"
   type        = string
-  default     = ""
+  default     = null
 }
 
 variable "grafana-dashboard-offer-url" {
   description = "Offer URL from grafana-k8s:grafana-dashboard application"
   type        = string
-  default     = ""
+  default     = null
+}
+
+variable "logging-offer-url" {
+  description = "Offer URL from loki-k8s:logging application"
+  type        = string
+  default     = null
 }
 
 variable "enable-octavia" {
@@ -700,26 +706,26 @@ variable "tempest-config" {
   default     = {}
 }
 
-variable "grafana-agent-k8s-name" {
-  description = "Operator name for Grafana Agent K8s deployment"
-  type        = string
-  default     = "grafana-agent-k8s"
+variable "enable-observability" {
+  description = "Enable Observability"
+  type        = bool
+  default     = false
 }
 
-variable "metrics-endpoint" {
-  description = "Endpoint name for grafana-agent-k8s:metric_endpoint"
+variable "grafana-agent-channel" {
   type        = string
-  default     = null
+  default     = "latest/stable"
+  description = "Operator channel for grafana-agent deployment"
 }
 
-variable "logging-provider" {
-  description = "Endpoint name for grafana-agent-k8s:logging-provider"
-  type        = string
+variable "grafana-agent-revision" {
+  type        = number
   default     = null
+  description = "Operator channel revision for grafana-agent deployment"
 }
 
-variable "grafana-dashboards-consumer" {
-  description = "Endpoint name for grafana-agent-k8s:grafana-dashboards-consumer"
-  type        = string
-  default     = null
+variable "grafana-agent-config" {
+  type        = map(string)
+  default     = {}
+  description = "Operator config for grafana-agent deployment"
 }
