@@ -42,3 +42,48 @@ resource "juju_application" "mysql" {
 
   units = var.scale
 }
+
+resource "juju_integration" "mysql-to-metrics-endpoint" {
+  count = (var.metrics-endpoint-app != null) ? length(juju_application.mysql) : 0
+  model = var.model
+
+  application {
+    name     = juju_application.mysql[count.index].name
+    endpoint = "metrics-endpoint"
+  }
+
+  application {
+    name     = var.metrics-endpoint-app
+    endpoint = "metrics-endpoint"
+  }
+}
+
+resource "juju_integration" "mysql-to-grafana-dashboard" {
+  count = (var.grafana-dashboard-app != null) ? length(juju_application.mysql) : 0
+  model = var.model
+
+  application {
+    name     = juju_application.mysql[count.index].name
+    endpoint = "grafana-dashboard"
+  }
+
+  application {
+    name     = var.grafana-dashboard-app
+    endpoint = "grafana-dashboards-consumer"
+  }
+}
+
+resource "juju_integration" "mysql-to-logging" {
+  count = (var.logging-app != null) ? length(juju_application.mysql) : 0
+  model = var.model
+
+  application {
+    name     = juju_application.mysql[count.index].name
+    endpoint = "logging"
+  }
+
+  application {
+    name     = var.logging-app
+    endpoint = "logging-provider"
+  }
+}

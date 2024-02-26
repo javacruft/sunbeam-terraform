@@ -64,3 +64,21 @@ variable "resource-configs" {
   type        = map(string)
   default     = {}
 }
+
+variable "logging-app" {
+  description = "Name of application providing logging endpoint"
+  type        = string
+  default     = null
+}
+
+variable "grafana-dashboard-app" {
+  description = "Name of application providing grafana-dashboard endpoint"
+  type        = string
+  default     = null
+}
+
+variable "metrics-endpoint-app" {
+  description = "Name of application providing metrics endpoint"
+  type        = string
+  default     = null
+}
