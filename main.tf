@@ -627,7 +627,7 @@ resource "juju_integration" "openstack-exporter-to-keystone-cacert" {
 }
 
 resource "juju_integration" "openstack-exporter-to-metrics-endpoint" {
-  count = (var.enable-telemetry && var.prometheus-metrics-offer-url != "") ? 1 : 0
+  count = (var.enable-telemetry && var.enable-observability) ? 1 : 0
   model = juju_model.sunbeam.name
 
   application {
@@ -636,12 +636,13 @@ resource "juju_integration" "openstack-exporter-to-metrics-endpoint" {
   }
 
   application {
-    offer_url = var.prometheus-metrics-offer-url
+    name     = juju_application.grafana-agent[count.index].name
+    endpoint = "metrics-endpoint"
   }
 }
 
 resource "juju_integration" "openstack-exporter-to-grafana-dashboard" {
-  count = (var.enable-telemetry && var.grafana-dashboard-offer-url != "") ? 1 : 0
+  count = (var.enable-telemetry && var.enable-observability) ? 1 : 0
   model = juju_model.sunbeam.name
 
   application {
@@ -650,7 +651,8 @@ resource "juju_integration" "openstack-exporter-to-grafana-dashboard" {
   }
 
   application {
-    offer_url = var.grafana-dashboard-offer-url
+    name     = juju_application.grafana-agent[count.index].name
+    endpoint = "grafana-dashboards-consumer"
   }
 }
 
@@ -985,8 +987,8 @@ resource "juju_integration" "tempest-to-keystone" {
   }
 }
 
-resource "juju_integration" "tempest-to-grafana-agent-k8s-loki" {
-  count = (var.enable-validation && var.logging-provider != null) ? 1 : 0
+resource "juju_integration" "tempest-to-grafana-agent-loki" {
+  count = (var.enable-validation && var.enable-observability) ? 1 : 0
   model = juju_model.sunbeam.name
 
   application {
@@ -995,13 +997,13 @@ resource "juju_integration" "tempest-to-grafana-agent-k8s-loki" {
   }
 
   application {
-    name     = var.grafana-agent-k8s-name
-    endpoint = var.logging-provider
+    name     = juju_application.grafana-agent[count.index].name
+    endpoint = "logging-provider"
   }
 }
 
-resource "juju_integration" "tempest-to-grafana-agent-k8s-grafana" {
-  count = (var.enable-validation && var.grafana-dashboards-consumer != null) ? 1 : 0
+resource "juju_integration" "tempest-to-grafana-agent-grafana" {
+  count = (var.enable-validation && var.enable-observability) ? 1 : 0
   model = juju_model.sunbeam.name
 
   application {
@@ -1010,7 +1012,66 @@ resource "juju_integration" "tempest-to-grafana-agent-k8s-grafana" {
   }
 
   application {
-    name     = var.grafana-agent-k8s-name
-    endpoint = var.grafana-dashboards-consumer
+    name     = juju_application.grafana-agent[count.index].name
+    endpoint = "grafana-dashboards-consumer"
+  }
+}
+
+resource "juju_application" "grafana-agent" {
+  count = var.enable-observability ? 1 : 0
+  name  = "grafana-agent"
+  model = juju_model.sunbeam.name
+
+
+  charm {
+    name     = "grafana-agent-k8s"
+    base     = "ubuntu@22.04"
+    channel  = var.grafana-agent-channel
+    revision = var.grafana-agent-revision
+  }
+
+  units  = 1
+  config = var.grafana-agent-config
+}
+
+resource "juju_integration" "grafana-agent-to-receive-remote-write" {
+  count = (var.enable-observability && var.receive-remote-write-offer-url != null) ? 1 : 0
+  model = juju_model.sunbeam.name
+
+  application {
+    name     = juju_application.grafana-agent[count.index].name
+    endpoint = "send-remote-write"
+  }
+
+  application {
+    offer_url = var.receive-remote-write-offer-url
+  }
+}
+
+resource "juju_integration" "grafana-agent-to-logging" {
+  count = (var.enable-observability && var.logging-offer-url != null) ? 1 : 0
+  model = juju_model.sunbeam.name
+
+  application {
+    name     = juju_application.grafana-agent[count.index].name
+    endpoint = "logging-consumer"
+  }
+
+  application {
+    offer_url = var.logging-offer-url
+  }
+}
+
+resource "juju_integration" "grafana-agent-to-cos-grafana" {
+  count = (var.enable-observability && var.grafana-dashboard-offer-url != null) ? 1 : 0
+  model = juju_model.sunbeam.name
+
+  application {
+    name     = juju_application.grafana-agent[count.index].name
+    endpoint = "grafana-dashboards-provider"
+  }
+
+  application {
+    offer_url = var.grafana-dashboard-offer-url
   }
 }
