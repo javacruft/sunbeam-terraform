@@ -16,13 +16,13 @@
 variable "openstack-channel" {
   description = "Operator channel for OpenStack deployment"
   type        = string
-  default     = "2023.2/edge"
+  default     = "2023.2/stable"
 }
 
 variable "mysql-channel" {
   description = "Operator channel for MySQL deployment"
   type        = string
-  default     = "8.0/candidate"
+  default     = "8.0/stable"
 }
 
 variable "mysql-revision" {
@@ -48,7 +48,7 @@ variable "mysql-router-channel" {
 variable "traefik-channel" {
   description = "Operator channel for Traefik deployment"
   type        = string
-  default     = "1.0/candidate"
+  default     = "1.0/stable"
 }
 
 variable "traefik-revision" {
@@ -66,7 +66,7 @@ variable "traefik-config" {
 variable "rabbitmq-channel" {
   description = "Operator channel for RabbitMQ deployment"
   type        = string
-  default     = "3.12/edge"
+  default     = "3.12/stable"
 }
 
 variable "rabbitmq-revision" {
@@ -102,7 +102,7 @@ variable "certificate-authority-config" {
 variable "ovn-channel" {
   description = "Operator channel for OVN deployment"
   type        = string
-  default     = "23.09/edge"
+  default     = "23.09/stable"
 }
 
 variable "ovn-central-channel" {
@@ -506,7 +506,7 @@ variable "enable-designate" {
 variable "bind-channel" {
   description = "Operator channel for Bind deployment"
   type        = string
-  default     = "9/edge"
+  default     = "9/stable"
 }
 
 variable "bind-revision" {
@@ -624,7 +624,7 @@ variable "magnum-config" {
 variable "ldap-channel" {
   description = "Operator channel for Keystone LDAP deployment"
   type        = string
-  default     = "2023.2/edge"
+  default     = "2023.2/stable"
 }
 
 variable "ldap-revision" {
