@@ -19,7 +19,7 @@ terraform {
   required_providers {
     juju = {
       source  = "juju/juju"
-      version = "= 0.10.0"
+      version = "= 0.10.1"
     }
   }
 }
@@ -33,9 +33,12 @@ resource "juju_application" "mysql" {
   constraints = var.constraints
 
   charm {
-    name    = "mysql-k8s"
-    channel = var.channel
+    name     = "mysql-k8s"
+    channel  = var.channel
+    revision = var.revision
   }
+
+  config = var.resource-configs
 
   units = var.scale
 }

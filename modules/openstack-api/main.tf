@@ -19,7 +19,7 @@ terraform {
   required_providers {
     juju = {
       source  = "juju/juju"
-      version = "= 0.10.0"
+      version = "= 0.10.1"
     }
   }
 }
@@ -29,8 +29,9 @@ resource "juju_application" "service" {
   model = var.model
 
   charm {
-    name    = var.charm
-    channel = var.channel
+    name     = var.charm
+    channel  = var.channel
+    revision = var.revision
   }
 
   config = var.resource-configs
@@ -139,6 +140,21 @@ resource "juju_integration" "service-to-keystone-ops" {
   application {
     name     = juju_application.service.name
     endpoint = "identity-ops"
+  }
+}
+
+resource "juju_integration" "service-to-keystone-cacerts" {
+  for_each = var.keystone-cacerts == "" ? {} : { target = var.keystone-cacerts }
+  model    = var.model
+
+  application {
+    name     = each.value
+    endpoint = "send-ca-cert"
+  }
+
+  application {
+    name     = juju_application.service.name
+    endpoint = "receive-ca-cert"
   }
 }
 
@@ -275,4 +291,12 @@ resource "juju_offer" "cinder-ceph-offer" {
   model            = var.model
   application_name = juju_application.service.name
   endpoint         = "ceph-access"
+}
+
+resource "juju_offer" "cert-distributor-offer" {
+  count            = var.name == "keystone" ? 1 : 0
+  model            = var.model
+  application_name = juju_application.service.name
+  endpoint         = "send-ca-cert"
+  name             = "cert-distributor"
 }

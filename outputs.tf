@@ -44,3 +44,8 @@ output "cinder-ceph-offer-url" {
   description = "URL of the cinder ceph offer"
   value       = one(module.cinder-ceph.cinder-ceph-offer-url[*])
 }
+
+output "cert-distributor-offer-url" {
+  description = "URL of the cert distributor offer"
+  value       = one(module.keystone.cert-distributor-offer-url[*])
+}

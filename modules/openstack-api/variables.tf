@@ -20,14 +20,20 @@ variable "name" {
 
 variable "channel" {
   description = "Operator channel"
-  default     = "latest/edge"
   type        = string
+  default     = "latest/edge"
+}
+
+variable "revision" {
+  description = "Operator channel revision"
+  type        = string
+  default     = null
 }
 
 variable "mysql-router-channel" {
   description = "Operator channel for MySQL router deployment"
-  default     = "8.0/edge"
   type        = string
+  default     = "8.0/edge"
 }
 
 variable "scale" {
@@ -70,6 +76,12 @@ variable "keystone-credentials" {
 }
 
 variable "keystone-ops" {
+  description = "Keystone operator to integrate with"
+  type        = string
+  default     = ""
+}
+
+variable "keystone-cacerts" {
   description = "Keystone operator to integrate with"
   type        = string
   default     = ""
