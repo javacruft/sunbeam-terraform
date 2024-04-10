@@ -28,6 +28,7 @@ provider "juju" {}
 
 locals {
   services-with-mysql = ["keystone", "glance", "nova", "horizon", "neutron", "placement", "cinder"]
+  grafana-agent-name  = length(juju_application.grafana-agent) > 0 ? juju_application.grafana-agent[0].name : null
 }
 
 data "juju_offer" "microceph" {
@@ -48,15 +49,18 @@ resource "juju_model" "sunbeam" {
 }
 
 module "mysql" {
-  source           = "./modules/mysql"
-  model            = juju_model.sunbeam.name
-  name             = "mysql"
-  channel          = var.mysql-channel
-  revision         = var.mysql-revision
-  scale            = var.ha-scale
-  many-mysql       = var.many-mysql
-  services         = local.services-with-mysql
-  resource-configs = var.mysql-config
+  source                = "./modules/mysql"
+  model                 = juju_model.sunbeam.name
+  name                  = "mysql"
+  channel               = var.mysql-channel
+  revision              = var.mysql-revision
+  scale                 = var.ha-scale
+  many-mysql            = var.many-mysql
+  services              = local.services-with-mysql
+  resource-configs      = var.mysql-config
+  grafana-dashboard-app = local.grafana-agent-name
+  metrics-endpoint-app  = local.grafana-agent-name
+  logging-app           = local.grafana-agent-name
 }
 
 module "rabbitmq" {
@@ -372,16 +376,19 @@ resource "juju_offer" "ca-offer" {
 }
 
 module "mysql-heat" {
-  count            = var.enable-heat ? (var.many-mysql ? 1 : 0) : 0
-  source           = "./modules/mysql"
-  model            = juju_model.sunbeam.name
-  name             = "mysql"
-  channel          = var.mysql-channel
-  revision         = var.mysql-revision
-  scale            = var.ha-scale
-  many-mysql       = var.many-mysql
-  services         = ["heat"]
-  resource-configs = var.mysql-config
+  count                 = var.enable-heat ? (var.many-mysql ? 1 : 0) : 0
+  source                = "./modules/mysql"
+  model                 = juju_model.sunbeam.name
+  name                  = "mysql"
+  channel               = var.mysql-channel
+  revision              = var.mysql-revision
+  scale                 = var.ha-scale
+  many-mysql            = var.many-mysql
+  services              = ["heat"]
+  resource-configs      = var.mysql-config
+  grafana-dashboard-app = local.grafana-agent-name
+  metrics-endpoint-app  = local.grafana-agent-name
+  logging-app           = local.grafana-agent-name
 }
 
 module "heat" {
@@ -435,16 +442,19 @@ resource "juju_integration" "heat-to-ingress-internal" {
 }
 
 module "mysql-telemetry" {
-  count            = var.enable-telemetry ? (var.many-mysql ? 1 : 0) : 0
-  source           = "./modules/mysql"
-  model            = juju_model.sunbeam.name
-  name             = "mysql"
-  channel          = var.mysql-channel
-  revision         = var.mysql-revision
-  scale            = var.ha-scale
-  many-mysql       = var.many-mysql
-  services         = ["aodh", "gnocchi"]
-  resource-configs = var.mysql-config
+  count                 = var.enable-telemetry ? (var.many-mysql ? 1 : 0) : 0
+  source                = "./modules/mysql"
+  model                 = juju_model.sunbeam.name
+  name                  = "mysql"
+  channel               = var.mysql-channel
+  revision              = var.mysql-revision
+  scale                 = var.ha-scale
+  many-mysql            = var.many-mysql
+  services              = ["aodh", "gnocchi"]
+  resource-configs      = var.mysql-config
+  grafana-dashboard-app = local.grafana-agent-name
+  metrics-endpoint-app  = local.grafana-agent-name
+  logging-app           = local.grafana-agent-name
 }
 
 module "aodh" {
@@ -657,16 +667,19 @@ resource "juju_integration" "openstack-exporter-to-grafana-dashboard" {
 }
 
 module "mysql-octavia" {
-  count            = var.enable-octavia ? (var.many-mysql ? 1 : 0) : 0
-  source           = "./modules/mysql"
-  model            = juju_model.sunbeam.name
-  name             = "mysql"
-  channel          = var.mysql-channel
-  revision         = var.mysql-revision
-  scale            = var.ha-scale
-  many-mysql       = var.many-mysql
-  services         = ["octavia"]
-  resource-configs = var.mysql-config
+  count                 = var.enable-octavia ? (var.many-mysql ? 1 : 0) : 0
+  source                = "./modules/mysql"
+  model                 = juju_model.sunbeam.name
+  name                  = "mysql"
+  channel               = var.mysql-channel
+  revision              = var.mysql-revision
+  scale                 = var.ha-scale
+  many-mysql            = var.many-mysql
+  services              = ["octavia"]
+  resource-configs      = var.mysql-config
+  grafana-dashboard-app = local.grafana-agent-name
+  metrics-endpoint-app  = local.grafana-agent-name
+  logging-app           = local.grafana-agent-name
 }
 
 module "octavia" {
@@ -736,16 +749,19 @@ resource "juju_application" "bind" {
 }
 
 module "mysql-designate" {
-  count            = var.enable-designate ? (var.many-mysql ? 1 : 0) : 0
-  source           = "./modules/mysql"
-  model            = juju_model.sunbeam.name
-  name             = "mysql"
-  channel          = var.mysql-channel
-  revision         = var.mysql-revision
-  scale            = var.ha-scale
-  many-mysql       = var.many-mysql
-  services         = ["designate"]
-  resource-configs = var.mysql-config
+  count                 = var.enable-designate ? (var.many-mysql ? 1 : 0) : 0
+  source                = "./modules/mysql"
+  model                 = juju_model.sunbeam.name
+  name                  = "mysql"
+  channel               = var.mysql-channel
+  revision              = var.mysql-revision
+  scale                 = var.ha-scale
+  many-mysql            = var.many-mysql
+  services              = ["designate"]
+  resource-configs      = var.mysql-config
+  grafana-dashboard-app = local.grafana-agent-name
+  metrics-endpoint-app  = local.grafana-agent-name
+  logging-app           = local.grafana-agent-name
 }
 
 module "designate" {
@@ -800,16 +816,19 @@ resource "juju_application" "vault" {
 }
 
 module "mysql-barbican" {
-  count            = var.enable-barbican ? (var.many-mysql ? 1 : 0) : 0
-  source           = "./modules/mysql"
-  model            = juju_model.sunbeam.name
-  name             = "mysql"
-  channel          = var.mysql-channel
-  revision         = var.mysql-revision
-  scale            = var.ha-scale
-  many-mysql       = var.many-mysql
-  services         = ["barbican"]
-  resource-configs = var.mysql-config
+  count                 = var.enable-barbican ? (var.many-mysql ? 1 : 0) : 0
+  source                = "./modules/mysql"
+  model                 = juju_model.sunbeam.name
+  name                  = "mysql"
+  channel               = var.mysql-channel
+  revision              = var.mysql-revision
+  scale                 = var.ha-scale
+  many-mysql            = var.many-mysql
+  services              = ["barbican"]
+  resource-configs      = var.mysql-config
+  grafana-dashboard-app = local.grafana-agent-name
+  metrics-endpoint-app  = local.grafana-agent-name
+  logging-app           = local.grafana-agent-name
 }
 
 module "barbican" {
@@ -848,16 +867,19 @@ resource "juju_integration" "barbican-to-vault" {
 }
 
 module "mysql-magnum" {
-  count            = var.enable-magnum ? (var.many-mysql ? 1 : 0) : 0
-  source           = "./modules/mysql"
-  model            = juju_model.sunbeam.name
-  name             = "mysql"
-  channel          = var.mysql-channel
-  revision         = var.mysql-revision
-  scale            = var.ha-scale
-  many-mysql       = var.many-mysql
-  services         = ["magnum"]
-  resource-configs = var.mysql-config
+  count                 = var.enable-magnum ? (var.many-mysql ? 1 : 0) : 0
+  source                = "./modules/mysql"
+  model                 = juju_model.sunbeam.name
+  name                  = "mysql"
+  channel               = var.mysql-channel
+  revision              = var.mysql-revision
+  scale                 = var.ha-scale
+  many-mysql            = var.many-mysql
+  services              = ["magnum"]
+  resource-configs      = var.mysql-config
+  grafana-dashboard-app = local.grafana-agent-name
+  metrics-endpoint-app  = local.grafana-agent-name
+  logging-app           = local.grafana-agent-name
 }
 
 module "magnum" {
