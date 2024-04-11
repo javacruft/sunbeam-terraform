@@ -26,7 +26,7 @@ jobs:
         run: |
           echo '{"credential": "microk8s", "enable-vault": true, "enable-barbican": true}' > terraform.tfvars.json
           terraform init
-          terraform apply -auto-approve
+          terraform apply -auto-approve -var-file=channels/edge.tfvars
           juju model-config -m openstack automatically-retry-hooks=true
           juju-wait -vw -m openstack -t 3600 -x cinder-ceph -r 3
       - name: Collect juju status
