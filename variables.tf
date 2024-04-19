@@ -16,7 +16,7 @@
 variable "openstack-channel" {
   description = "Operator channel for OpenStack deployment"
   type        = string
-  default     = "2023.2/stable"
+  default     = "2024.1/stable"
 }
 
 variable "mysql-channel" {
@@ -102,7 +102,7 @@ variable "certificate-authority-config" {
 variable "ovn-channel" {
   description = "Operator channel for OVN deployment"
   type        = string
-  default     = "23.09/stable"
+  default     = "24.03/stable"
 }
 
 variable "ovn-central-channel" {
@@ -624,7 +624,7 @@ variable "magnum-config" {
 variable "ldap-channel" {
   description = "Operator channel for Keystone LDAP deployment"
   type        = string
-  default     = "2023.2/stable"
+  default     = "2024.1/stable"
 }
 
 variable "ldap-revision" {
