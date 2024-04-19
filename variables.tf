@@ -558,7 +558,7 @@ variable "enable-vault" {
 variable "vault-channel" {
   description = "Operator channel for Vault deployment"
   type        = string
-  default     = "latest/edge"
+  default     = "1.15/edge"
 }
 
 variable "vault-revision" {
