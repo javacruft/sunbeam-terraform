@@ -300,3 +300,10 @@ resource "juju_offer" "cert-distributor-offer" {
   endpoint         = "send-ca-cert"
   name             = "cert-distributor"
 }
+
+resource "juju_offer" "nova-offer" {
+  count            = var.name == "nova" ? 1 : 0
+  model            = var.model
+  application_name = juju_application.service.name
+  endpoint         = "nova-service"
+}

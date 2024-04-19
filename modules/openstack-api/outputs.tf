@@ -32,3 +32,8 @@ output "cert-distributor-offer-url" {
   description = "URL of the cert distributor offer"
   value       = juju_offer.cert-distributor-offer[*].url
 }
+
+output "nova-offer-url" {
+  description = "URL of the nova offer"
+  value       = juju_offer.nova-offer[*].url
+}

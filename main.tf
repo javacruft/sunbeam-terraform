@@ -122,11 +122,39 @@ module "nova" {
   mysql                = module.mysql.name["nova"]
   keystone             = module.keystone.name
   keystone-cacerts     = module.keystone.name
-  ingress-internal     = juju_application.traefik.name
-  ingress-public       = juju_application.traefik-public.name
+  ingress-internal     = ""
+  ingress-public       = ""
   scale                = var.os-api-scale
   mysql-router-channel = var.mysql-router-channel
   resource-configs     = var.nova-config
+}
+
+resource "juju_integration" "nova-to-ingress-public" {
+  model = juju_model.sunbeam.name
+
+  application {
+    name     = module.nova.name
+    endpoint = "traefik-route-public"
+  }
+
+  application {
+    name     = juju_application.traefik-public.name
+    endpoint = "traefik-route"
+  }
+}
+
+resource "juju_integration" "nova-to-ingress-internal" {
+  model = juju_model.sunbeam.name
+
+  application {
+    name     = module.nova.name
+    endpoint = "traefik-route-internal"
+  }
+
+  application {
+    name     = juju_application.traefik.name
+    endpoint = "traefik-route"
+  }
 }
 
 module "horizon" {

@@ -49,3 +49,8 @@ output "cert-distributor-offer-url" {
   description = "URL of the cert distributor offer"
   value       = one(module.keystone.cert-distributor-offer-url[*])
 }
+
+output "nova-offer-url" {
+  description = "URL of the nova service offer"
+  value       = one(module.nova.nova-offer-url[*])
+}
